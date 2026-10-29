@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Plumbline
 
-## Getting Started
+### The contractor's video becomes the receipt.
 
-First, run the development server:
+Plumbline is for Nigerians abroad who are building a house back home. The foreman records a two-minute guided visit and Plumbline turns it into counts you can audit: SAM 3.1 segments and numbers every block, column and opening, and Muse Spark checks the result against the bill of quantities and the previous visit. A milestone is marked verified only after every check on the visit passes.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+**Watch the demo** (TODO) · **Live app** (TODO) · **Verify it yourself** · **[Architecture](ARCHITECTURE.md)** · **Run it locally**
+
+## Demo
+
+TODO, 3-minute video.
+
+## Verify it yourself in 60 seconds
+
+```sh
+npm install
+npm test          # 4 passing
+cp .env.example .env.local   # add MODEL_API_KEY
+npm run spike -- path/to/wall.jpg
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## The problem
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+TODO
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## What it does
 
-## Learn More
+See the capability map in [ARCHITECTURE.md](ARCHITECTURE.md#capability-map).
 
-To learn more about Next.js, take a look at the following resources:
+## The hard problem
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+TODO
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## What's real vs simplified
 
-## Deploy on Vercel
+TODO
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Run it locally
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Variable | Required | Description |
+|---|---|---|
+| `MODEL_API_KEY` | yes | Meta Model API key |
+| `DATA_DIR` | no | SQLite and media directory, default `./data` |
+| `APP_URL` | no | Base URL for foreman capture links |
+
+## Disclosure
+
+Built for the Meta Global AI Developer Hackathon (Indie Developer track). First commit: 2026-10-29. Scaffolded with `create-next-app`.
