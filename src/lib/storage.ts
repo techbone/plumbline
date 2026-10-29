@@ -10,7 +10,12 @@ import { list, put } from "@vercel/blob";
  */
 
 const LOCAL_DIR = process.env.DATA_DIR ?? join(process.cwd(), "data");
-const blobEnabled = () => Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+const blobEnabled = () => {
+  if (process.env.BLOB_READ_WRITE_TOKEN) return true;
+  // A serverless disk is read-only and forgets everything, so never fall back to it there.
+  if (process.env.VERCEL) throw new Error("BLOB_READ_WRITE_TOKEN is not set: connect a Blob store to this Vercel project");
+  return false;
+};
 
 export async function putObject(path: string, body: Buffer | string, contentType: string): Promise<void> {
   if (blobEnabled()) {

@@ -11,14 +11,19 @@ export async function POST(req: Request) {
   const project = token ? projectByToken(token) : undefined;
   if (!project) return NextResponse.json({ error: "Unknown capture link" }, { status: 404 });
 
-  const milestone = project.milestones.find((m) => m.id === milestoneId) ?? project.milestones[0];
-  const { ticket, data } = issueTicket(project.id, milestone.id);
-  await saveMeta(data);
+  try {
+    const milestone = project.milestones.find((m) => m.id === milestoneId) ?? project.milestones[0];
+    const { ticket, data } = issueTicket(project.id, milestone.id);
+    await saveMeta(data);
 
-  return NextResponse.json({
-    visitId: data.visitId,
-    code: data.code,
-    expiresAt: new Date(data.expiresAt).toISOString(),
-    ticket,
-  });
+    return NextResponse.json({
+      visitId: data.visitId,
+      code: data.code,
+      expiresAt: new Date(data.expiresAt).toISOString(),
+      ticket,
+    });
+  } catch (err) {
+    console.error("[visits] start failed", err);
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Couldn't start the visit" }, { status: 500 });
+  }
 }
