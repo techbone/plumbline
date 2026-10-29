@@ -43,3 +43,7 @@ next-env.d.ts
 
 # app data
 /data
+
+# local test photos (may show our house); evidence JSON is committed instead
+/fixtures
+docs/evidence/spike/*.svg
