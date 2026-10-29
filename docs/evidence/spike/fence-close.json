@@ -1,0 +1,29 @@
+{
+  "file": "fence-close.jpg",
+  "blockPrompt": "concrete block",
+  "wallPrompt": "wall",
+  "size": {
+    "width": 1536,
+    "height": 2048
+  },
+  "blocks": {
+    "count": 34,
+    "status": "completed",
+    "ms": 16092,
+    "diagnostics": []
+  },
+  "wall": {
+    "instances": 3,
+    "area": 2117781,
+    "status": "completed",
+    "ms": 17308
+  },
+  "crossCheck": {
+    "instanceCount": 34,
+    "areaEstimate": 44,
+    "medianBlockArea": 44460,
+    "deviation": 0.22727272727272727,
+    "agrees": false
+  },
+  "lowConfidence": 0
+}

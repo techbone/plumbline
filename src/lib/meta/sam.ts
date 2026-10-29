@@ -97,6 +97,6 @@ export async function segmentImage(
 
 /** Records carry the source `w`/`h`; the parser doesn't expose them. */
 function sourceSize(raw: string): { width: number; height: number } {
-  const m = raw.match(/;w=(\d+);h=(\d+)\|>/);
+  const m = raw.match(/;w=(\d+);h=(\d+)/);
   return m ? { width: Number(m[1]), height: Number(m[2]) } : { width: 0, height: 0 };
 }

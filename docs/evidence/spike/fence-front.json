@@ -1,0 +1,29 @@
+{
+  "file": "fence-front.jpg",
+  "blockPrompt": "concrete block",
+  "wallPrompt": "wall",
+  "size": {
+    "width": 2048,
+    "height": 1536
+  },
+  "blocks": {
+    "count": 92,
+    "status": "completed",
+    "ms": 19142,
+    "diagnostics": []
+  },
+  "wall": {
+    "instances": 1,
+    "area": 1592160,
+    "status": "completed",
+    "ms": 13204
+  },
+  "crossCheck": {
+    "instanceCount": 92,
+    "areaEstimate": 112,
+    "medianBlockArea": 13122.5,
+    "deviation": 0.17857142857142858,
+    "agrees": false
+  },
+  "lowConfidence": 0
+}

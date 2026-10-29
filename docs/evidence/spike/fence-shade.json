@@ -1,0 +1,29 @@
+{
+  "file": "fence-shade.jpg",
+  "blockPrompt": "concrete block",
+  "wallPrompt": "wall",
+  "size": {
+    "width": 1536,
+    "height": 2048
+  },
+  "blocks": {
+    "count": 57,
+    "status": "completed",
+    "ms": 9634,
+    "diagnostics": []
+  },
+  "wall": {
+    "instances": 4,
+    "area": 1640567,
+    "status": "completed",
+    "ms": 26729
+  },
+  "crossCheck": {
+    "instanceCount": 57,
+    "areaEstimate": 77,
+    "medianBlockArea": 19805,
+    "deviation": 0.2597402597402597,
+    "agrees": false
+  },
+  "lowConfidence": 0
+}

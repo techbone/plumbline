@@ -1,0 +1,29 @@
+{
+  "file": "fence-angle.jpg",
+  "blockPrompt": "concrete block",
+  "wallPrompt": "wall",
+  "size": {
+    "width": 2048,
+    "height": 1536
+  },
+  "blocks": {
+    "count": 90,
+    "status": "completed",
+    "ms": 14924,
+    "diagnostics": []
+  },
+  "wall": {
+    "instances": 1,
+    "area": 1289428,
+    "status": "completed",
+    "ms": 12313
+  },
+  "crossCheck": {
+    "instanceCount": 90,
+    "areaEstimate": 138,
+    "medianBlockArea": 8643,
+    "deviation": 0.34782608695652173,
+    "agrees": false
+  },
+  "lowConfidence": 0
+}
