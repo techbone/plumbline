@@ -22,3 +22,15 @@ Dead ends, surprises from the Meta API, the path chosen, and the test that guard
 - **Next:** calibrate the factor on a hand-counted wall, add a straight-on check (reject when the wall's top edge isn't level), and prompt SAM a second time for the "dark/grey block" case.
 - **Counting rule (used for every hand count):** one count per block face at least half visible, including cut and partial blocks at edges and pillars. Exclude the buried or stained foundation course and anything behind grass.
 - **Fixed on the way:** the overlay `viewBox` was `0 0 0 0` because the size regex required `|>` right after `h=`, and `include_confidence` adds a field there.
+
+## 2026-10-29 — SAM video tracking on a 31 s walkthrough: works, but not for counting
+
+- **Setup:** 31.7 s phone clip (about 60 fps, 1,900 frames), shrunk to 29 MB and uploaded through the Files API. Raw results in `docs/evidence/spike/fence-walk.*.json`.
+- **Blocks:** `"concrete block"` returns 16 tracks, peak 16 per frame: the documented cap. Identities last 170 to 360 frames each. Took 257 s.
+- **Pillars:** `"concrete pillar"` and `"wall pillar"` return 0 tracks on video. `"vertical concrete column"` returns 5 tracks (peak 2 per frame) for what looks like about 3 pillars in the clip, so identities are not clean enough to count from. That run took 1,834 s.
+- **Phrasing is fragile on stills too:** on the front photo `"concrete pillar"`, `"pillar"` and `"column"` find 0; `"wall pillar"` finds 2 and `"vertical concrete column"` finds 3.
+- **Openings are solid:** on one walkthrough frame, `"hollow block opening"`, `"ventilation opening"` and `"hole in wall"` each return 8, matching the 8 vent blocks in the frame.
+- **Cost:** about 1,900 frames per prompt, so about $0.38 per video run, against $0.0025 per still.
+- **Path chosen:** every count that gates a milestone runs in image mode on stills and walkthrough keyframes. Video tracking becomes an optional precomputed continuity view for the demo.
+- **Guard:** `docs/evidence/spike/*.video.json` and the per-frame opening test (to be added as a unit-level eval when the pipeline exists).
+- **Tooling note:** `ffmpeg-static` downloaded slowly (about 10 minutes); macOS `avconvert` was a fast fallback for shrinking the clip locally.

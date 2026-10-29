@@ -1,0 +1,136 @@
+{
+  "file": "fence-walk.540.mp4",
+  "results": [
+    {
+      "prompt": "concrete pillar",
+      "tracks": [],
+      "framesSeen": 0,
+      "peakPerFrame": 0,
+      "status": "completed",
+      "diagnostics": [],
+      "ms": 48311
+    },
+    {
+      "prompt": "concrete block",
+      "tracks": [
+        {
+          "id": "0",
+          "firstFrame": 0,
+          "lastFrame": 262,
+          "frames": 263,
+          "confidence": 0.9298245906829834
+        },
+        {
+          "id": "1",
+          "firstFrame": 0,
+          "lastFrame": 292,
+          "frames": 293,
+          "confidence": 0.9259259104728699
+        },
+        {
+          "id": "2",
+          "firstFrame": 0,
+          "lastFrame": 1111,
+          "frames": 359,
+          "confidence": 0.9179486632347107
+        },
+        {
+          "id": "3",
+          "firstFrame": 0,
+          "lastFrame": 173,
+          "frames": 174,
+          "confidence": 0.9179486632347107
+        },
+        {
+          "id": "4",
+          "firstFrame": 0,
+          "lastFrame": 289,
+          "frames": 290,
+          "confidence": 0.9179486632347107
+        },
+        {
+          "id": "5",
+          "firstFrame": 0,
+          "lastFrame": 293,
+          "frames": 294,
+          "confidence": 0.9139785170555115
+        },
+        {
+          "id": "6",
+          "firstFrame": 0,
+          "lastFrame": 262,
+          "frames": 263,
+          "confidence": 0.9139785170555115
+        },
+        {
+          "id": "7",
+          "firstFrame": 0,
+          "lastFrame": 174,
+          "frames": 175,
+          "confidence": 0.9139785170555115
+        },
+        {
+          "id": "8",
+          "firstFrame": 0,
+          "lastFrame": 198,
+          "frames": 199,
+          "confidence": 0.9139785170555115
+        },
+        {
+          "id": "9",
+          "firstFrame": 0,
+          "lastFrame": 614,
+          "frames": 342,
+          "confidence": 0.9139785170555115
+        },
+        {
+          "id": "10",
+          "firstFrame": 0,
+          "lastFrame": 195,
+          "frames": 196,
+          "confidence": 0.9139785170555115
+        },
+        {
+          "id": "11",
+          "firstFrame": 0,
+          "lastFrame": 200,
+          "frames": 201,
+          "confidence": 0.9139785170555115
+        },
+        {
+          "id": "12",
+          "firstFrame": 0,
+          "lastFrame": 301,
+          "frames": 302,
+          "confidence": 0.9101123809814453
+        },
+        {
+          "id": "13",
+          "firstFrame": 0,
+          "lastFrame": 205,
+          "frames": 206,
+          "confidence": 0.9101123809814453
+        },
+        {
+          "id": "14",
+          "firstFrame": 0,
+          "lastFrame": 202,
+          "frames": 203,
+          "confidence": 0.9101123809814453
+        },
+        {
+          "id": "15",
+          "firstFrame": 0,
+          "lastFrame": 193,
+          "frames": 194,
+          "confidence": 0.9101123809814453
+        }
+      ],
+      "framesSeen": 371,
+      "peakPerFrame": 16,
+      "status": "completed",
+      "diagnostics": [],
+      "ms": 256696
+    }
+  ]
+}

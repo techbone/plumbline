@@ -22,7 +22,8 @@ Nigerians abroad (and in Abuja or Lagos) build houses in their hometowns through
 | Owner sets milestones from a BOQ | BOQ PDF → structured milestone targets (blocks, columns, openings) | Muse Spark 1.3, `POST /v1/responses`, PDF input, JSON schema output |
 | Foreman proves the visit is live | One-time code written on a block / held to camera and spoken | Muse Spark 1.3 (frames: is code `K74Q` visible?) + Muse Voice Transcribe `POST /v1/asr/transcribe` (spoken code, English) |
 | Count laid blocks per elevation | Still per wall face → instance masks → count | SAM 3.1 image, `POST /v1/responses`, prompt `"concrete block"` |
-| Count columns, openings, block stacks | Walkthrough video → identity-tracked objects, each counted once | SAM 3.1 video, `POST /v1/responses`, `input_video` via Files API, tracking |
+| Count openings (vents, windows, doors) and pillars per elevation | Straight-on stills or keyframes pulled from the walkthrough → instance masks | SAM 3.1 image, prompts such as `"hollow block opening"`, `"vertical concrete column"` |
+| Continuity track over the walkthrough (optional, precomputed) | Walkthrough video → blocks keep their identity across frames | SAM 3.1 video, `input_video` via Files API |
 | Same site as last time? What changed? | Baseline frames vs this visit's frames | Muse Spark 1.3, multi-image input |
 | Stage verdict against milestone | Counts + frames + BOQ → verdict and gaps | Muse Spark 1.3, structured output |
 
@@ -64,7 +65,7 @@ flowchart LR
 ## Key flows (the demo)
 
 1. **Visit with a live code.** Foreman opens the capture link → gets code `K74Q` (valid 30 min) → writes it on a block → films a 60–90 s walkthrough and four elevation stills → uploads. Pipeline: liveness ✓ → reuse ✓ → site match ✓ → counts → cross-check → verdict.
-2. **The count you can audit.** On the owner's report, each elevation shows the SAM masks numbered 1…n, alongside the instance count, the area estimate, and whether they agree. Tracked columns and openings in the walkthrough replay with stable IDs.
+2. **The count you can audit.** On the owner's report, each elevation shows the SAM masks numbered 1…n, alongside the instance count, the area estimate, and whether they agree. Openings and pillars are counted per elevation still. The walkthrough replay with tracked blocks is a continuity view, precomputed rather than run live.
 3. **The lie gets caught.** Resubmitting last week's footage fails the reuse step, another site's photos fail site match, and a missing code fails liveness. The tranche stays locked and the report says exactly why.
 
 ## Stack choices
@@ -73,7 +74,7 @@ flowchart LR
 - **SQLite (`better-sqlite3`) + a media volume on one container:** SAM video streams and Spark calls can run for minutes, which doesn't fit serverless time limits. One long-lived Node process with a disk is the simplest thing that works.
 - **`ffmpeg-static`:** MP4 faststart remux (SAM requirement), keyframe extraction, frame hashes. No system ffmpeg needed.
 - **Deploy:** Docker on Railway (or Fly) with a volume.
-- **SAM limits that shaped the design:** video tracking caps at 16 objects per frame, so walls are counted from stills in image mode, and video is used only for sparse objects (columns, openings, stacks). Video must be MP4/MOV with H.264/H.265, up to 15,000 frames.
+- **SAM limits that shaped the design:** video tracking caps at 16 objects per frame and took 4 to 30 minutes per prompt on a 31 s clip, so every count that gates a milestone runs in image mode on stills (about 10 to 20 s each, $0.0025). Video is an optional, precomputed continuity view. Video must be MP4/MOV with H.264/H.265, up to 15,000 frames.
 
 ## Out of scope
 

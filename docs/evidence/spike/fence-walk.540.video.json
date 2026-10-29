@@ -1,0 +1,59 @@
+{
+  "file": "fence-walk.540.mp4",
+  "results": [
+    {
+      "prompt": "wall pillar",
+      "tracks": [],
+      "framesSeen": 0,
+      "peakPerFrame": 0,
+      "status": "completed",
+      "diagnostics": [],
+      "ms": 47257
+    },
+    {
+      "prompt": "vertical concrete column",
+      "tracks": [
+        {
+          "id": "0",
+          "firstFrame": 82,
+          "lastFrame": 207,
+          "frames": 126,
+          "confidence": 0.7104072570800781
+        },
+        {
+          "id": "1",
+          "firstFrame": 501,
+          "lastFrame": 1159,
+          "frames": 396,
+          "confidence": 0.7264957427978516
+        },
+        {
+          "id": "2",
+          "firstFrame": 509,
+          "lastFrame": 1111,
+          "frames": 375,
+          "confidence": 0.7037037014961243
+        },
+        {
+          "id": "3",
+          "firstFrame": 1522,
+          "lastFrame": 1897,
+          "frames": 376,
+          "confidence": 0.7064220309257507
+        },
+        {
+          "id": "4",
+          "firstFrame": 1559,
+          "lastFrame": 1650,
+          "frames": 92,
+          "confidence": 0.7264957427978516
+        }
+      ],
+      "framesSeen": 964,
+      "peakPerFrame": 2,
+      "status": "completed",
+      "diagnostics": [],
+      "ms": 1833705
+    }
+  ]
+}
