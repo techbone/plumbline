@@ -1,44 +1,42 @@
 "use client";
 
 import { ArrowRight, CameraOff, Upload, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui";
+import { FRAME_FPS, MAX_FRAMES, grabFrame } from "@/lib/client/frames";
+import type { Uploader } from "@/lib/client/uploader";
 
-const MAX_SECONDS = 120;
 const HOLD_ON_CODE_S = 2.5;
 const MIN_SECONDS = 4;
-
-const MIME_TYPES = [
-  "video/mp4;codecs=avc1.640028",
-  "video/mp4;codecs=avc1",
-  "video/mp4",
-  "video/webm;codecs=vp9",
-  "video/webm;codecs=vp8",
-  "video/webm",
-];
 
 type Phase = "starting" | "ready" | "recording" | "error";
 
 /**
- * Full-screen camera with the walk guides drawn over the preview: framing
- * lines for the top of the wall and the ground, a hold-on-the-code countdown,
- * then a one-step-per-second pace beat while walking.
+ * Full-screen camera with the walk guides drawn over the preview. While
+ * recording it grabs a still every half second and hands it to the uploader, so
+ * SAM is counting blocks while the foreman is still walking. No video is
+ * recorded or sent: a 30 s walk is about 9 MB of stills.
  */
 export function Camera({
   code,
+  uploader,
   onDone,
   onCancel,
   onFallback,
+  liveCount,
+  counted,
 }: {
   code: string;
-  onDone: (video: Blob) => void;
+  uploader: Uploader;
+  onDone: () => void;
   onCancel: () => void;
   onFallback: () => void;
+  liveCount: number | null;
+  counted: number;
 }) {
   const videoEl = useRef<HTMLVideoElement>(null);
+  const canvas = useRef<HTMLCanvasElement | null>(null);
   const stream = useRef<MediaStream | null>(null);
-  const recorder = useRef<MediaRecorder | null>(null);
-  const chunks = useRef<Blob[]>([]);
   const startedAt = useRef(0);
   const [phase, setPhase] = useState<Phase>("starting");
   const [error, setError] = useState<string | null>(null);
@@ -59,6 +57,7 @@ export function Camera({
           videoEl.current.srcObject = s;
           await videoEl.current.play().catch(() => {});
         }
+        canvas.current = document.createElement("canvas");
         setPhase("ready");
       } catch (e) {
         setError(
@@ -77,33 +76,33 @@ export function Camera({
     };
   }, []);
 
-  const stop = useCallback(() => {
-    if (recorder.current?.state === "recording") recorder.current.stop();
-  }, []);
+  function finish() {
+    stream.current?.getTracks().forEach((t) => t.stop());
+    onDone();
+  }
 
+  // One still per tick; the clock is the wall clock so a slow tick never drops a frame.
   useEffect(() => {
     if (phase !== "recording") return;
-    const t = setInterval(() => {
+    let taken = 0;
+    const t = setInterval(async () => {
       const s = (performance.now() - startedAt.current) / 1000;
       setElapsed(s);
-      if (s >= MAX_SECONDS) stop();
+      const due = Math.floor(s * FRAME_FPS) + 1;
+      while (taken < due && taken < MAX_FRAMES) {
+        taken++;
+        if (videoEl.current && canvas.current) {
+          const blob = await grabFrame(videoEl.current, canvas.current);
+          if (blob) uploader.add(blob);
+        }
+      }
+      if (taken >= MAX_FRAMES || uploader.fatal) finish();
     }, 100);
     return () => clearInterval(t);
-  }, [phase, stop]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
 
   function record() {
-    if (!stream.current) return;
-    const mimeType = MIME_TYPES.find((t) => typeof MediaRecorder !== "undefined" && MediaRecorder.isTypeSupported(t));
-    const r = new MediaRecorder(stream.current, { mimeType, videoBitsPerSecond: 8_000_000 });
-    chunks.current = [];
-    r.ondataavailable = (e) => e.data.size && chunks.current.push(e.data);
-    r.onstop = () => {
-      const blob = new Blob(chunks.current, { type: (r.mimeType || mimeType || "video/mp4").split(";")[0] });
-      stream.current?.getTracks().forEach((t) => t.stop());
-      onDone(blob);
-    };
-    r.start(1000);
-    recorder.current = r;
     startedAt.current = performance.now();
     setElapsed(0);
     setPhase("recording");
@@ -113,7 +112,7 @@ export function Camera({
   const onCode = phase === "recording" && elapsed < HOLD_ON_CODE_S;
   const walking = phase === "recording" && elapsed >= HOLD_ON_CODE_S;
   const beat = Math.floor(elapsed) % 4;
-  const mm = String(Math.floor(elapsed / 60)).padStart(1, "0");
+  const mm = String(Math.floor(elapsed / 60));
   const ss = String(Math.floor(elapsed % 60)).padStart(2, "0");
 
   if (phase === "error") {
@@ -122,12 +121,12 @@ export function Camera({
         <CameraOff size={28} strokeWidth={1.5} className="text-white/60" />
         <div>
           <p className="font-display text-[22px] font-semibold">Camera unavailable</p>
-          <p className="mt-1.5 text-[14px] text-white/60">{error} Record with your phone&rsquo;s camera app and upload the video instead.</p>
+          <p className="mt-1.5 text-[14px] text-white/60">{error} Record with your phone&rsquo;s camera app and pick the video instead.</p>
         </div>
         <div className="w-full max-w-[360px] space-y-2">
           <Button onClick={onFallback}>
             <Upload size={18} strokeWidth={1.75} />
-            Upload a video
+            Pick a video
           </Button>
           <Button variant="inverse" size="md" onClick={onCancel}>Back</Button>
         </div>
@@ -139,7 +138,6 @@ export function Camera({
     <main className="fixed inset-0 overflow-hidden bg-black text-white">
       <video ref={videoEl} muted playsInline autoPlay className="absolute inset-0 h-full w-full object-cover" />
 
-      {/* Framing guides: top of the wall near the upper line, ground near the lower. */}
       <div className="pointer-events-none absolute inset-x-0 top-[24%] border-t border-dashed border-white/45">
         <span className="absolute -top-6 left-4 text-[11px] uppercase tracking-[0.08em] text-white/70">Top of wall</span>
       </div>
@@ -148,8 +146,11 @@ export function Camera({
       </div>
 
       <div className="absolute inset-x-0 top-0 flex items-center justify-between bg-gradient-to-b from-black/60 to-transparent px-4 pb-10 pt-[max(14px,env(safe-area-inset-top))]">
-        <button onClick={phase === "recording" ? undefined : onCancel} aria-label="Close camera"
-          className={`flex h-10 w-10 items-center justify-center rounded-full bg-black/35 ${phase === "recording" ? "opacity-0" : ""}`}>
+        <button
+          onClick={phase === "recording" ? undefined : onCancel}
+          aria-label="Close camera"
+          className={`flex h-10 w-10 items-center justify-center rounded-full bg-black/35 ${phase === "recording" ? "opacity-0" : ""}`}
+        >
           <X size={20} strokeWidth={1.75} />
         </button>
         <span className="rounded-full bg-black/45 px-3 py-1.5 text-[13px]">
@@ -160,6 +161,14 @@ export function Camera({
           {phase === "recording" ? `${mm}:${ss}` : ""}
         </span>
       </div>
+
+      {/* Live count: proof the walk is being read while it happens. */}
+      {phase === "recording" && counted > 0 && (
+        <div className="absolute right-4 top-[calc(max(14px,env(safe-area-inset-top))+56px)] rounded-[10px] bg-black/50 px-3 py-2 text-right backdrop-blur-sm">
+          <p className="font-mono tnum text-[22px] font-medium leading-none">{liveCount ?? "–"}</p>
+          <p className="mt-1 text-[11px] text-white/60">blocks in view</p>
+        </div>
+      )}
 
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/40 to-transparent px-5 pb-[max(22px,env(safe-area-inset-bottom))] pt-16">
         <div className="mb-6 min-h-[64px] text-center" aria-live="polite">
@@ -195,13 +204,21 @@ export function Camera({
 
         <div className="flex items-center justify-center">
           {phase !== "recording" ? (
-            <button onClick={record} disabled={phase !== "ready"} aria-label="Start recording"
-              className="flex h-[76px] w-[76px] items-center justify-center rounded-full border-[3px] border-white disabled:opacity-40">
+            <button
+              onClick={record}
+              disabled={phase !== "ready"}
+              aria-label="Start recording"
+              className="flex h-[76px] w-[76px] items-center justify-center rounded-full border-[3px] border-white disabled:opacity-40"
+            >
               <span className="h-[58px] w-[58px] rounded-full bg-[#ff4d3a]" />
             </button>
           ) : (
-            <button onClick={stop} disabled={elapsed < MIN_SECONDS} aria-label="Stop recording"
-              className="flex h-[76px] w-[76px] items-center justify-center rounded-full border-[3px] border-white disabled:opacity-60">
+            <button
+              onClick={finish}
+              disabled={elapsed < MIN_SECONDS}
+              aria-label="Stop recording"
+              className="flex h-[76px] w-[76px] items-center justify-center rounded-full border-[3px] border-white disabled:opacity-60"
+            >
               <span className="h-7 w-7 rounded-[6px] bg-[#ff4d3a]" />
             </button>
           )}

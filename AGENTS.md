@@ -4,9 +4,11 @@ Plumbline: construction progress verification for owners who can't be on site. R
 
 ## Rules
 
-- All Meta API calls go through `src/lib/meta/`. The app, `scripts/e2e.ts` and the eval script share that code. No mocks of Meta calls in the product path.
+- All Meta API calls go through `src/lib/meta/`. The app and the scripts share that code. No mocks of Meta calls in the product path.
+- The phone sends JPEG stills, never video. The server recomputes everything from stored frames and counts; it never trusts counts sent by the client.
+- No database. State is write-once objects via `src/lib/storage.ts` (Vercel Blob in production, `./data` locally). Projects live in `src/lib/projects.ts`.
 - Deterministic logic (area cross-check, hashing, verdict rules) lives in `src/lib/verify/` as pure functions with unit tests.
-- The UI never says "verified" unless a stored `step` row says `passed`.
+- The UI never says "verified" unless the stored report says so (`result.verdict.status`).
 - Commits: short lowercase conventional one-liners (`feat: add elevation upload`). No co-author or generated-by lines.
 - Every surprise from the Meta API gets an entry in `docs/build-log.md`.
 

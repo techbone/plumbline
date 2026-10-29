@@ -6,11 +6,12 @@ import { Logo } from "@/components/logo";
 import { Button, Card, Eyebrow, naira } from "@/components/ui";
 import { Camera } from "./camera";
 import { Processing } from "./processing";
-import { Review } from "./review";
+import { framesFromFile } from "@/lib/client/frames";
+import { Uploader } from "@/lib/client/uploader";
 
 export type MilestoneView = { id: string; title: string; kind: string; target: number; tranche: number };
-type Visit = { visitId: string; code: string; expiresAt: string };
-type Stage = "intro" | "code" | "camera" | "review" | "send";
+type Visit = { visitId: string; code: string; expiresAt: string; ticket: string };
+type Stage = "intro" | "code" | "camera" | "finish";
 
 export function CaptureFlow({
   token,
@@ -24,7 +25,9 @@ export function CaptureFlow({
   const [stage, setStage] = useState<Stage>("intro");
   const [milestoneId, setMilestoneId] = useState(milestones[0]?.id);
   const [visit, setVisit] = useState<Visit | null>(null);
-  const [video, setVideo] = useState<Blob | null>(null);
+  const [, force] = useState(0);
+  const [reading, setReading] = useState<{ done: number; total: number } | null>(null);
+  const uploader = useRef<Uploader | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -42,6 +45,8 @@ export function CaptureFlow({
       const body = await res.json();
       if (!res.ok) throw new Error(body.error ?? "Couldn't start the visit");
       setVisit(body);
+      uploader.current?.dispose();
+      uploader.current = new Uploader(body.visitId, body.ticket, () => force((n) => n + 1));
       setStage("code");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't start the visit");
@@ -50,21 +55,32 @@ export function CaptureFlow({
     }
   }
 
-  function picked(file: File | undefined) {
-    if (!file) return;
-    setVideo(file);
-    setStage("review");
+  async function picked(file: File | undefined) {
+    if (!file || !uploader.current) return;
+    const up = uploader.current;
+    setReading({ done: 0, total: 1 });
+    setStage("finish");
+    try {
+      const frames = await framesFromFile(file, (done, total) => setReading({ done, total }));
+      frames.forEach((f) => up.add(f.blob));
+    } catch (e) {
+      up.fatal = e instanceof Error ? e.message : "Couldn't read that video";
+    }
+    setReading(null);
+    force((n) => n + 1);
   }
 
-  if (stage === "camera" && visit) {
+  if (stage === "camera" && visit && uploader.current) {
+    const up = uploader.current;
+    const lastFrame = [...up.frames].reverse().find((f) => f.blocks !== undefined);
     return (
       <Camera
         code={visit.code}
+        uploader={up}
+        liveCount={lastFrame?.blocks ?? null}
+        counted={up.counted}
         onCancel={() => setStage("code")}
-        onDone={(blob) => {
-          setVideo(blob);
-          setStage("review");
-        }}
+        onDone={() => setStage("finish")}
         onFallback={() => fileInput.current?.click()}
       />
     );
@@ -82,7 +98,7 @@ export function CaptureFlow({
         type="file"
         accept="video/*"
         className="hidden"
-        onChange={(e) => picked(e.target.files?.[0])}
+        onChange={(e) => void picked(e.target.files?.[0])}
       />
 
       {stage === "intro" && (
@@ -125,7 +141,7 @@ export function CaptureFlow({
               One slow step a second, phone upright, wall filling the screen.
             </HowTo>
             <HowTo n={3} icon={<Send size={16} strokeWidth={1.75} />} title="Send">
-              Counting takes about two minutes, and {project.owner} gets the report.
+              Counting runs while you walk, and {project.owner} gets the report.
             </HowTo>
           </ol>
 
@@ -152,19 +168,8 @@ export function CaptureFlow({
         />
       )}
 
-      {stage === "review" && video && (
-        <Review
-          video={video}
-          onRetake={() => {
-            setVideo(null);
-            setStage("camera");
-          }}
-          onSend={() => setStage("send")}
-        />
-      )}
-
-      {stage === "send" && visit && video && (
-        <Processing visitId={visit.visitId} video={video} milestone={milestone} />
+      {stage === "finish" && visit && uploader.current && (
+        <Processing visitId={visit.visitId} ticket={visit.ticket} uploader={uploader.current} tick={uploader.current.frames.length + uploader.current.counted} reading={reading} />
       )}
     </main>
   );
@@ -197,7 +202,7 @@ function CodeStep({ visit, onCamera, onUpload }: { visit: Visit; onCamera: () =>
     <section key="code" className="animate-rise flex flex-1 flex-col pt-8">
       <Eyebrow>Step 1 of 3</Eyebrow>
       <h1 className="font-display mt-2 text-[28px] font-semibold leading-[1.1]">Write this code on a block</h1>
-      <p className="mt-2 text-[15px] text-muted">Big and clear, on the first block you&rsquo;ll film. It proves this video was shot today, for this visit.</p>
+      <p className="mt-2 text-[15px] text-muted">Big and clear, on the first block you&rsquo;ll film. It proves this walk was filmed today, for this visit.</p>
 
       <div className="mt-8 grid grid-cols-4 gap-2" aria-label={`Visit code ${visit.code.split("").join(" ")}`}>
         {visit.code.split("").map((ch, i) => (
@@ -221,7 +226,7 @@ function CodeStep({ visit, onCamera, onUpload }: { visit: Visit; onCamera: () =>
       <Card className="mt-6 flex items-center gap-4 p-4">
         <ChalkBlock code={visit.code} />
         <p className="text-[14px] leading-snug text-muted">
-          Start the video on this block. Hold it in frame for two seconds, then walk.
+          Start the walk on this block. Hold it in frame for two seconds, then walk.
         </p>
       </Card>
 
@@ -232,7 +237,7 @@ function CodeStep({ visit, onCamera, onUpload }: { visit: Visit; onCamera: () =>
         </Button>
         <Button variant="ghost" size="md" onClick={onUpload} disabled={expired}>
           <Upload size={16} strokeWidth={1.75} />
-          Upload a video instead
+          Pick a video instead
         </Button>
       </div>
     </section>

@@ -43,3 +43,12 @@ Dead ends, surprises from the Meta API, the path chosen, and the test that guard
 - **Errors seen by eye:** a few small spurious sightings in mortar gaps and grass (23, 49, 55, 187, 204, 210, 212) and a few doubled labels where two sightings landed side by side (156/52, 213/235, 221/234). Nearly all are in the "seen once" group. A few cool-grey blocks near the vent are still missed. My eyeball estimate puts the true count within about 5% of 237. No hand count of the full walk exists yet.
 - **Path chosen:** report "confirmed" (seen in 2+ keyframes) separately from "needs review" (seen once). The walk-along becomes the main capture; straight-on stills stay as a fallback.
 - **Guard:** `stitch.test.ts` (shift recovery on a synthetic texture, edge-box skip, same-frame boxes never merge) and `docs/evidence/walk/fence-walk.540.json`.
+
+## 2026-10-29 — Vercel free plan: no database, no video upload, stills from the phone
+
+- **Constraint:** Vercel functions take about 4.5 MB per request and have no lasting disk; a phone walk is 30 to 94 MB. Fly.io wasn't available (free trial expired).
+- **Path chosen:** the phone cuts a still every half second and sends each as its own request. The server stores the frame (Vercel Blob), counts blocks with SAM, and returns the count, so counting runs live. The visit is a signed ticket (HMAC), so there's no database. `/finish` reads the stored frames and counts back, decodes small grey copies in pure JS (`jpeg-js`), stitches, reads the visit code with Muse Spark, and writes the report.
+- **Measured:** 31.7 s walk = 63 frames = 9.3 MB, against 29 MB for the 540p video and 94 MB as recorded. End to end through the HTTP API: 115 s, 225 confirmed, 15 to check.
+- **Wrong estimate corrected:** I first said about 4 MB; the real figure is 9.3 MB (about 148 KB a frame).
+- **Self-inflicted bug:** adding `VISIT_SECRET` to `.env.local` mid-run changed the signing key and later frames got `401 Invalid visit ticket`. Not a code bug; rerunning after a restart passed.
+- **Guard:** `scripts/e2e.ts` (same HTTP calls as the phone), `docs/evidence/e2e/`, `verdict.test.ts`.

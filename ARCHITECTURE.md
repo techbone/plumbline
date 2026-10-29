@@ -4,7 +4,7 @@
 
 ## Pitch
 
-Nigerians abroad (and in Abuja or Lagos) build houses in their hometowns through a relative or a contractor they can't supervise. Proof of progress today is a WhatsApp photo, and the documented failure mode is years of photos of someone else's house. Plumbline turns a two-minute site visit into a count you can audit. The foreman films a guided walkthrough with a one-time visit code. SAM 3.1 counts blocks, columns, openings and block stacks with pixel masks. Muse Spark compares the result against the bill of quantities (BOQ) and the previous visit. The owner gets a per-milestone verdict ("Verified: 1,742 of 1,800 blocks") before releasing the next tranche.
+Nigerians abroad (and in Abuja or Lagos) build houses in their hometowns through a relative or a contractor they can't supervise. Proof of progress today is a WhatsApp photo, and the documented failure mode is years of photos of someone else's house. Plumbline turns a two-minute site visit into a count you can audit. The foreman walks the wall with a one-time visit code and the phone sends stills, not video. SAM 3.1 counts blocks, columns, openings and block stacks with pixel masks. Muse Spark compares the result against the bill of quantities (BOQ) and the previous visit. The owner gets a per-milestone verdict ("Verified: 1,742 of 1,800 blocks") before releasing the next tranche.
 
 **What makes it different:** enterprise tools (Buildots, OpenSpace, Roboflow) serve construction firms with 360° cameras and models trained per site. The diaspora services (BuildPanda, Track Your Build) rely on human inspectors and daily logs. Plumbline is the first that gives a homeowner a count produced by segmentation rather than an LLM's guess, with no training data, from a phone.
 
@@ -33,34 +33,31 @@ Our own deterministic code: the area cross-check (wall-mask area ÷ median block
 
 ```mermaid
 flowchart LR
-  F[Foreman<br/>mobile web capture] -->|video + elevations + code| API[Next.js route handlers]
-  O[Owner<br/>web dashboard] --> API
-  API --> DB[(SQLite)]
-  API --> FS[(Media volume)]
-  API --> Q[In-process job runner]
-  Q --> FF[ffmpeg-static<br/>faststart, keyframes, dHash]
-  Q --> SAM[SAM 3.1<br/>image + video]
-  Q --> SPARK[Muse Spark 1.3]
-  Q --> ASR[Muse Voice Transcribe]
-  Q --> DB
+  F[Foreman phone<br/>stills every 0.5 s] -->|JPEG frames + signed ticket| API[Next.js route handlers on Vercel]
+  O[Owner<br/>/r/visit-id] --> API
+  API --> BLOB[(Vercel Blob<br/>frames, counts, report)]
+  API --> SAM[SAM 3.1<br/>image mode]
+  API --> SPARK[Muse Spark 1.3<br/>reads the visit code]
 ```
+
+The phone never uploads a video. It grabs a still every half second while the foreman walks (shortest side 540 px, JPEG), and each frame is sent as its own small request. A 31 s walk is about 9 MB, against 29 MB for the same video shrunk to 540p and 94 MB as the phone recorded it. That keeps every request under serverless limits, keeps mobile data use low (data is expensive in Nigeria, and a cap on size also caps abuse and cost), and lets SAM count while the walk is still happening.
 
 ## Components
 
-- **Web app (Next.js 15, App Router):** the owner dashboard (projects, milestones, visit reports with mask overlays) and a mobile-first foreman capture flow. Both are one deploy.
-- **Route handlers:** project/milestone CRUD, visit-code issue, media upload, visit status (polled).
-- **Job runner:** in-process queue that runs the verification pipeline per visit. Each step writes its own status row, so the UI shows named steps instead of one spinner.
-- **`src/lib/meta/`:** thin clients for SAM (`segmentImage`, `trackVideo` using `@meta-sam/parser`), Spark (`assessStage`, `extractMilestones`, `checkCode`, `compareSites`) and ASR (`transcribe`). These are the only places that talk to Meta. The e2e script and the app share them.
-- **`src/lib/verify/`:** pure functions for the area cross-check, reuse hashing, and verdict rules, all unit-tested.
+- **Web app (Next.js 15, App Router):** `/v/<token>` the foreman's capture flow, `/r/<visit-id>` the shareable owner report (anyone with the link can read it; the id is unguessable).
+- **`/api/visits`:** issues a signed ticket (visit id, one-time code, expiry, HMAC). No database: every later call is checked against the signature.
+- **`/api/visits/<id>/frames/<k>`:** receives one JPEG, stores it, runs SAM 3.1 `"concrete block"`, stores the boxes, returns the count (limits: 240 frames, 1.5 MB each).
+- **`/api/visits/<id>/finish`:** reads frames and counts back from storage (never from the phone), decodes small grey copies in plain JavaScript, estimates the shift between frames, merges sightings into unique blocks, asks Muse Spark to read the visit code blind, applies the release rule, writes the report.
+- **`src/lib/meta/`:** the only code that talks to Meta. **`src/lib/verify/`:** pure functions (stitching, area cross-check, release rule), unit-tested.
 
 ## Data model
 
-- `project`: id, name, location, owner name, baseline_visit_id, boq_file, created_at
-- `milestone`: id, project_id, title, kind (`blocks|columns|openings|stage`), target, tranche_ngn, status (`open|verified|short|review`)
-- `visit`: id, project_id, code, code_issued_at, code_expires_at, submitted_at, status
-- `media`: id, visit_id, kind (`walkthrough|elevation`), label (`front|left|back|right`), path, sha256, dhash
-- `step`: visit_id, name (`liveness|reuse|site_match|count_elevations|track_walkthrough|cross_check|stage_assessment|verdict`), status (`pending|running|passed|failed|review`), detail_json, started_at, finished_at
-- `count`: visit_id, media_id, object (`block|column|opening|stack`), n, method (`sam_instances|sam_track|area_estimate|spark_guess`), confidence, overlay_path
+No database. Projects and milestones are code (`src/lib/projects.ts`). Everything a visit produces is one write-once object in Vercel Blob (local folder in dev):
+
+- `visits/<id>/meta.json`: ticket plus project and milestone text
+- `visits/<id>/frames/0000.jpg ...`: keyframes
+- `visits/<id>/sam/0000.json ...`: SAM boxes per frame
+- `visits/<id>/result.json`: stitched blocks, code check, verdict
 
 ## Key flows (the demo)
 
@@ -70,11 +67,11 @@ flowchart LR
 
 ## Stack choices
 
-- **Next.js + TypeScript:** one deploy for both the dashboard and the capture flow, and the playbook default.
-- **SQLite (`better-sqlite3`) + a media volume on one container:** SAM video streams and Spark calls can run for minutes, which doesn't fit serverless time limits. One long-lived Node process with a disk is the simplest thing that works.
-- **`ffmpeg-static`:** MP4 faststart remux (SAM requirement), keyframe extraction, frame hashes. No system ffmpeg needed.
-- **Deploy:** Docker on Railway (or Fly) with a volume.
-- **SAM limits that shaped the design:** video tracking caps at 16 objects per frame and took 4 to 30 minutes per prompt on a 31 s clip, so every count that gates a milestone runs in image mode on stills (about 10 to 20 s each, $0.0025). Video is an optional, precomputed continuity view. Video must be MP4/MOV with H.264/H.265, up to 15,000 frames.
+- **Next.js + TypeScript on Vercel's free plan:** one deploy for the capture flow, report and API.
+- **Stills, not video, from the phone:** a 30 to 90 MB video can't pass through a function (about 4.5 MB request limit) and costs data. Stills are about 9 MB for a 31 s walk and let counting run live.
+- **Vercel Blob, no database:** the only state is write-once files; the signed ticket replaces a visit table.
+- **Pure-JS JPEG decode (`jpeg-js`), no ffmpeg on the server:** the stitching needs only small grey frames. `ffmpeg-static` stays as a dev dependency for the local scripts.
+- **SAM image mode for every count:** video tracking caps at 16 objects per frame and took 4 to 30 minutes per prompt on a 31 s clip (see `docs/build-log.md`).
 
 ## Out of scope
 
