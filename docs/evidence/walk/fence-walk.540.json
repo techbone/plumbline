@@ -1,0 +1,452 @@
+{
+  "file": "fence-walk.540.mp4",
+  "prompt": "concrete block",
+  "fps": 2,
+  "keyframes": 63,
+  "frameSize": {
+    "width": 540,
+    "height": 960
+  },
+  "uniqueBlocks": 237,
+  "seenOnce": 13,
+  "perFrame": [
+    46,
+    45,
+    45,
+    44,
+    42,
+    42,
+    38,
+    37,
+    35,
+    36,
+    35,
+    36,
+    38,
+    43,
+    43,
+    44,
+    43,
+    38,
+    38,
+    34,
+    34,
+    35,
+    33,
+    34,
+    35,
+    33,
+    39,
+    42,
+    43,
+    43,
+    44,
+    47,
+    44,
+    44,
+    40,
+    37,
+    36,
+    30,
+    29,
+    31,
+    31,
+    31,
+    28,
+    30,
+    34,
+    33,
+    29,
+    34,
+    35,
+    36,
+    35,
+    35,
+    35,
+    32,
+    32,
+    27,
+    29,
+    30,
+    28,
+    26,
+    24,
+    29,
+    28
+  ],
+  "shifts": [
+    {
+      "dx": 4,
+      "dy": 0,
+      "score": 6.8,
+      "overlap": 0.99
+    },
+    {
+      "dx": 4,
+      "dy": 0,
+      "score": 9.3,
+      "overlap": 0.99
+    },
+    {
+      "dx": 8,
+      "dy": 0,
+      "score": 12.6,
+      "overlap": 0.99
+    },
+    {
+      "dx": 16,
+      "dy": -4,
+      "score": 13.5,
+      "overlap": 0.97
+    },
+    {
+      "dx": 52,
+      "dy": -8,
+      "score": 14.8,
+      "overlap": 0.9
+    },
+    {
+      "dx": 92,
+      "dy": -8,
+      "score": 16.6,
+      "overlap": 0.82
+    },
+    {
+      "dx": 76,
+      "dy": -8,
+      "score": 14.4,
+      "overlap": 0.85
+    },
+    {
+      "dx": 72,
+      "dy": -12,
+      "score": 17.8,
+      "overlap": 0.86
+    },
+    {
+      "dx": 80,
+      "dy": -16,
+      "score": 15.4,
+      "overlap": 0.84
+    },
+    {
+      "dx": 88,
+      "dy": -12,
+      "score": 12.8,
+      "overlap": 0.83
+    },
+    {
+      "dx": 68,
+      "dy": -8,
+      "score": 14.8,
+      "overlap": 0.87
+    },
+    {
+      "dx": 72,
+      "dy": -16,
+      "score": 17.7,
+      "overlap": 0.85
+    },
+    {
+      "dx": 84,
+      "dy": -4,
+      "score": 15.4,
+      "overlap": 0.84
+    },
+    {
+      "dx": 100,
+      "dy": -8,
+      "score": 13.2,
+      "overlap": 0.81
+    },
+    {
+      "dx": 76,
+      "dy": -8,
+      "score": 15.4,
+      "overlap": 0.85
+    },
+    {
+      "dx": 84,
+      "dy": -8,
+      "score": 17.6,
+      "overlap": 0.84
+    },
+    {
+      "dx": 96,
+      "dy": -4,
+      "score": 17.4,
+      "overlap": 0.82
+    },
+    {
+      "dx": 88,
+      "dy": -4,
+      "score": 13,
+      "overlap": 0.83
+    },
+    {
+      "dx": 60,
+      "dy": 0,
+      "score": 16.5,
+      "overlap": 0.89
+    },
+    {
+      "dx": 48,
+      "dy": 0,
+      "score": 15.9,
+      "overlap": 0.91
+    },
+    {
+      "dx": 48,
+      "dy": -4,
+      "score": 14.4,
+      "overlap": 0.91
+    },
+    {
+      "dx": 68,
+      "dy": -8,
+      "score": 12.8,
+      "overlap": 0.87
+    },
+    {
+      "dx": 52,
+      "dy": -4,
+      "score": 12.8,
+      "overlap": 0.9
+    },
+    {
+      "dx": 56,
+      "dy": -8,
+      "score": 15.4,
+      "overlap": 0.89
+    },
+    {
+      "dx": 72,
+      "dy": -8,
+      "score": 13,
+      "overlap": 0.86
+    },
+    {
+      "dx": 88,
+      "dy": -12,
+      "score": 12.4,
+      "overlap": 0.83
+    },
+    {
+      "dx": 60,
+      "dy": -8,
+      "score": 14.3,
+      "overlap": 0.88
+    },
+    {
+      "dx": 52,
+      "dy": -8,
+      "score": 15.5,
+      "overlap": 0.9
+    },
+    {
+      "dx": 56,
+      "dy": 0,
+      "score": 12.5,
+      "overlap": 0.9
+    },
+    {
+      "dx": 88,
+      "dy": 8,
+      "score": 12,
+      "overlap": 0.83
+    },
+    {
+      "dx": 56,
+      "dy": 0,
+      "score": 12.5,
+      "overlap": 0.9
+    },
+    {
+      "dx": 64,
+      "dy": 0,
+      "score": 17.6,
+      "overlap": 0.88
+    },
+    {
+      "dx": 64,
+      "dy": -4,
+      "score": 16.4,
+      "overlap": 0.88
+    },
+    {
+      "dx": 60,
+      "dy": 0,
+      "score": 15.8,
+      "overlap": 0.89
+    },
+    {
+      "dx": 56,
+      "dy": 0,
+      "score": 14.4,
+      "overlap": 0.9
+    },
+    {
+      "dx": 36,
+      "dy": -8,
+      "score": 16.2,
+      "overlap": 0.93
+    },
+    {
+      "dx": 44,
+      "dy": -16,
+      "score": 16.2,
+      "overlap": 0.9
+    },
+    {
+      "dx": 64,
+      "dy": -4,
+      "score": 14.9,
+      "overlap": 0.88
+    },
+    {
+      "dx": 72,
+      "dy": -4,
+      "score": 12.3,
+      "overlap": 0.86
+    },
+    {
+      "dx": 48,
+      "dy": 0,
+      "score": 13.3,
+      "overlap": 0.91
+    },
+    {
+      "dx": 44,
+      "dy": -8,
+      "score": 17.1,
+      "overlap": 0.91
+    },
+    {
+      "dx": 36,
+      "dy": -8,
+      "score": 14.4,
+      "overlap": 0.93
+    },
+    {
+      "dx": 68,
+      "dy": -4,
+      "score": 15.2,
+      "overlap": 0.87
+    },
+    {
+      "dx": 68,
+      "dy": -12,
+      "score": 12.9,
+      "overlap": 0.86
+    },
+    {
+      "dx": 44,
+      "dy": -4,
+      "score": 14.2,
+      "overlap": 0.91
+    },
+    {
+      "dx": 36,
+      "dy": -8,
+      "score": 14.9,
+      "overlap": 0.93
+    },
+    {
+      "dx": 44,
+      "dy": 0,
+      "score": 12.8,
+      "overlap": 0.92
+    },
+    {
+      "dx": 60,
+      "dy": 0,
+      "score": 11,
+      "overlap": 0.89
+    },
+    {
+      "dx": 44,
+      "dy": 4,
+      "score": 10.1,
+      "overlap": 0.91
+    },
+    {
+      "dx": 48,
+      "dy": -8,
+      "score": 14.5,
+      "overlap": 0.9
+    },
+    {
+      "dx": 60,
+      "dy": -12,
+      "score": 14.6,
+      "overlap": 0.88
+    },
+    {
+      "dx": 76,
+      "dy": -8,
+      "score": 13.3,
+      "overlap": 0.85
+    },
+    {
+      "dx": 60,
+      "dy": -4,
+      "score": 11.7,
+      "overlap": 0.89
+    },
+    {
+      "dx": 40,
+      "dy": -4,
+      "score": 14.4,
+      "overlap": 0.92
+    },
+    {
+      "dx": 36,
+      "dy": -8,
+      "score": 15,
+      "overlap": 0.93
+    },
+    {
+      "dx": 36,
+      "dy": -8,
+      "score": 13,
+      "overlap": 0.93
+    },
+    {
+      "dx": 28,
+      "dy": 0,
+      "score": 11.4,
+      "overlap": 0.95
+    },
+    {
+      "dx": -20,
+      "dy": 4,
+      "score": 8.4,
+      "overlap": 0.96
+    },
+    {
+      "dx": -36,
+      "dy": 4,
+      "score": 7.6,
+      "overlap": 0.93
+    },
+    {
+      "dx": -36,
+      "dy": 4,
+      "score": 6.4,
+      "overlap": 0.93
+    },
+    {
+      "dx": -28,
+      "dy": 0,
+      "score": 7.4,
+      "overlap": 0.95
+    },
+    {
+      "dx": -24,
+      "dy": 4,
+      "score": 8,
+      "overlap": 0.95
+    }
+  ],
+  "worstShiftScore": "17.8"
+}

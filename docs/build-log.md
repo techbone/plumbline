@@ -34,3 +34,12 @@ Dead ends, surprises from the Meta API, the path chosen, and the test that guard
 - **Path chosen:** every count that gates a milestone runs in image mode on stills and walkthrough keyframes. Video tracking becomes an optional precomputed continuity view for the demo.
 - **Guard:** `docs/evidence/spike/*.video.json` and the per-frame opening test (to be added as a unit-level eval when the pipeline exists).
 - **Tooling note:** `ffmpeg-static` downloaded slowly (about 10 minutes); macOS `avconvert` was a fast fallback for shrinking the clip locally.
+
+## 2026-10-29 — Walk-along count: keyframes + SAM image mode + our own stitching
+
+- **Why:** SAM video tracking locks onto the first 16 objects (all 16 tracks in the fence walk start at frame 0), so it can't count a wall you walk along.
+- **What we built:** `src/lib/verify/stitch.ts`. Keyframes at 2 fps, SAM `"concrete block"` on each (63 calls, 90 s, about $0.16), sideways shift between neighbouring keyframes by brute-force image matching on 135 px grey frames, then every block placed on one shared wall map and merged. Boxes cut off at the frame's side edges are skipped because the block appears whole in a neighbour frame.
+- **Result on the 31 s fence walk:** 237 unique blocks, 13 of them seen in only one keyframe. The panorama lines up: courses stay level across 63 frames and nearly every block carries one number.
+- **Errors seen by eye:** a few small spurious sightings in mortar gaps and grass (23, 49, 55, 187, 204, 210, 212) and a few doubled labels where two sightings landed side by side (156/52, 213/235, 221/234). Nearly all are in the "seen once" group. A few cool-grey blocks near the vent are still missed. My eyeball estimate puts the true count within about 5% of 237. No hand count of the full walk exists yet.
+- **Path chosen:** report "confirmed" (seen in 2+ keyframes) separately from "needs review" (seen once). The walk-along becomes the main capture; straight-on stills stay as a fallback.
+- **Guard:** `stitch.test.ts` (shift recovery on a synthetic texture, edge-box skip, same-frame boxes never merge) and `docs/evidence/walk/fence-walk.540.json`.

@@ -10,7 +10,8 @@
     "spike": "tsx --env-file-if-exists=.env.local scripts/sam-spike.ts",
     "test": "tsx --test 'src/**/*.test.ts'",
     "typecheck": "tsc --noEmit",
-    "spike:video": "tsx --env-file-if-exists=.env.local scripts/video-spike.ts"
+    "spike:video": "tsx --env-file-if-exists=.env.local scripts/video-spike.ts",
+    "walk": "tsx --env-file-if-exists=.env.local scripts/walk-count.ts"
   },
   "dependencies": {
     "@meta-sam/parser": "^0.1.0",

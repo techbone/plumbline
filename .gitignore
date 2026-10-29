@@ -47,3 +47,4 @@ next-env.d.ts
 # local test photos (may show our house); evidence JSON is committed instead
 /fixtures
 docs/evidence/spike/*.svg
+docs/evidence/walk/*.svg
