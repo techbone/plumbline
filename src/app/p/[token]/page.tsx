@@ -95,7 +95,7 @@ export default async function OwnerPage({ params }: { params: Promise<{ token: s
             </Card>
           ) : (
             <div className="mt-3 overflow-x-auto rounded-[10px] border border-line bg-surface">
-              <table className="w-full min-w-[640px] text-left text-[14px]">
+              <table className="w-full min-w-[640px] whitespace-nowrap text-left text-[14px]">
                 <thead className="border-b border-line text-[12px] text-muted">
                   <tr>
                     <th className="px-4 py-2.5 font-medium">When</th>
