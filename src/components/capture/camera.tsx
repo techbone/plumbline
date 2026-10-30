@@ -39,47 +39,33 @@ export function Camera({
   const stream = useRef<MediaStream | null>(null);
   const startedAt = useRef(0);
   const [phase, setPhase] = useState<Phase>("starting");
+  const phaseRef = useRef<Phase>("starting");
+  phaseRef.current = phase;
   const [error, setError] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
-  const [cover, setCover] = useState<{ w: number; h: number } | null>(null);
+  const [sized, setSized] = useState(false);
 
-  // Size the preview to cover the screen by hand: iOS Safari doesn't always apply
-  // object-fit to a camera stream, which leaves a small picture in a black frame.
-  useEffect(() => {
-    const v = videoEl.current;
-    if (!v) return;
-    const fit = () => {
-      const vw = v.videoWidth;
-      const vh = v.videoHeight;
-      if (!vw || !vh) return;
-      const scale = Math.max(window.innerWidth / vw, window.innerHeight / vh);
-      setCover({ w: Math.ceil(vw * scale), h: Math.ceil(vh * scale) });
-    };
-    v.addEventListener("loadedmetadata", fit);
-    v.addEventListener("resize", fit);
-    window.addEventListener("resize", fit);
-    return () => {
-      v.removeEventListener("loadedmetadata", fit);
-      v.removeEventListener("resize", fit);
-      window.removeEventListener("resize", fit);
-    };
-  }, []);
+  async function openCamera() {
+    stream.current?.getTracks().forEach((t) => t.stop());
+    if (!navigator.mediaDevices?.getUserMedia) throw new Error("This browser can't open the camera here.");
+    const s = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 } },
+      audio: false,
+    });
+    stream.current = s;
+    if (videoEl.current) {
+      videoEl.current.srcObject = s;
+      await videoEl.current.play().catch(() => {});
+    }
+    return s;
+  }
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        if (!navigator.mediaDevices?.getUserMedia) throw new Error("This browser can't open the camera here.");
-        const s = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 } },
-          audio: false,
-        });
+        const s = await openCamera();
         if (cancelled) return s.getTracks().forEach((t) => t.stop());
-        stream.current = s;
-        if (videoEl.current) {
-          videoEl.current.srcObject = s;
-          await videoEl.current.play().catch(() => {});
-        }
         canvas.current = document.createElement("canvas");
         setPhase("ready");
       } catch (e) {
@@ -99,20 +85,68 @@ export function Camera({
     };
   }, []);
 
+  // Size the preview to cover the screen by hand, checked every frame. iOS Safari
+  // doesn't reliably apply object-fit to a camera stream, and both the stream
+  // size and the visible screen change (toolbar, rotation, returning to the tab).
+  // The preview stays hidden until the first measurement so it never flashes small.
+  useEffect(() => {
+    let raf = 0;
+    let last = "";
+    const tick = () => {
+      const v = videoEl.current;
+      if (v && v.videoWidth && v.videoHeight) {
+        const sw = window.innerWidth;
+        const sh = window.innerHeight;
+        const key = `${v.videoWidth}x${v.videoHeight}@${sw}x${sh}`;
+        if (key !== last) {
+          last = key;
+          const scale = Math.max(sw / v.videoWidth, sh / v.videoHeight);
+          v.style.width = `${Math.ceil(v.videoWidth * scale)}px`;
+          v.style.height = `${Math.ceil(v.videoHeight * scale)}px`;
+          setSized(true);
+        }
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  // iOS stops the camera while the page is hidden. Mid-walk, end the walk with
+  // the frames already sent rather than stitching across a gap; otherwise
+  // restart the camera when the page comes back.
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        if (phaseRef.current === "recording") finish();
+        return;
+      }
+      const track = stream.current?.getVideoTracks()[0];
+      if (track?.readyState === "live" && videoEl.current && !videoEl.current.paused) return;
+      openCamera().catch(() => {});
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   function finish() {
     stream.current?.getTracks().forEach((t) => t.stop());
     onDone();
   }
 
-  // One still per tick; the clock is the wall clock so a slow tick never drops a frame.
+  // A still every half second by the wall clock. After a slow tick take one
+  // still, not a burst: several grabs of the same video frame add nothing.
   useEffect(() => {
     if (phase !== "recording") return;
+    let slot = 0;
     let taken = 0;
     const t = setInterval(async () => {
       const s = (performance.now() - startedAt.current) / 1000;
       setElapsed(s);
       const due = Math.floor(s * FRAME_FPS) + 1;
-      while (taken < due && taken < MAX_FRAMES) {
+      if (due > slot && taken < MAX_FRAMES) {
+        slot = due;
         taken++;
         if (videoEl.current && canvas.current) {
           const blob = await grabFrame(videoEl.current, canvas.current);
@@ -167,8 +201,7 @@ export function Camera({
         muted
         playsInline
         autoPlay
-        className="absolute left-1/2 top-1/2 max-w-none -translate-x-1/2 -translate-y-1/2"
-        style={cover ? { width: cover.w, height: cover.h } : { width: "100%", height: "100%", objectFit: "cover" }}
+        className={`absolute left-1/2 top-1/2 max-w-none -translate-x-1/2 -translate-y-1/2 transition-opacity duration-200 ${sized ? "opacity-100" : "opacity-0"}`}
       />
 
       <div className="pointer-events-none absolute inset-x-0 top-[16%] border-t border-dashed border-white/45">
