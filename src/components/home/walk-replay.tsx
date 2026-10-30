@@ -121,7 +121,7 @@ export function WalkReplay() {
                 <span className="rounded-full bg-black/50 px-2.5 py-1 text-[11px]">
                   Code <span className="font-mono font-semibold tracking-[0.1em]">{data.code}</span>
                 </span>
-                <span className="flex items-center gap-1.5 font-mono tnum text-[11px]">
+                <span className="flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1 font-mono tnum text-[11px]">
                   <span className="h-1.5 w-1.5 rounded-full bg-[#ff4d3a]" />
                   0:{String(Math.floor(seconds)).padStart(2, "0")}
                 </span>

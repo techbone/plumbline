@@ -78,7 +78,7 @@ export default function Home() {
           </div>
           <dl className="mt-10 grid max-w-[560px] grid-cols-3 border-y border-line">
             <Stat label="Blocks counted on one walk" value="236" />
-            <Stat label="Stills sent a second, never a video" value="2" />
+            <Stat label="Stills a second, no video" value="2" />
             <Stat label="Report after stopping" value="~1 min" />
           </dl>
         </div>

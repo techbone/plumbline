@@ -62,3 +62,14 @@ Dead ends, surprises from the Meta API, the path chosen, and the test that guard
 - **Also seen:** frames are about 280 KB each on rough concrete, against 148 KB on the fence test clip, so a 44 s walk is 24 MB. A few loose stones on the ground were picked up as blocks, mostly in the seen-once group.
 - **Camera on iOS Safari:** `object-fit: cover` wasn't applied to the live stream, so the preview was a small picture in a black frame. It's now sized by hand every frame and hidden until measured. The camera restarts when the tab comes back, and a walk that's interrupted by leaving the tab ends with the frames already sent.
 - **Guard:** `stitch.test.ts` (close-up frames dropped).
+
+## 2026-10-30 — Location, same-site check, site notes, test sites
+
+- **Third phone walk (`vis_77d1c43227e3`):** code "VRKE" read, 117 stills (94 kept by the close-up filter), 236 confirmed and 21 seen once, verified. 31.5 MB.
+- **Location:** the phone watches GPS from "Start visit" and sends its best fix with `/finish`. The first visit with a fix of ±150 m or better and a readable code pins the site; later visits more than 150 m (plus both fixes' accuracy) from the pin, or with no fix, are held for review. Reports show the distance, never coordinates. Guard: `geo.test.ts`, `verdict.test.ts`.
+- **Muse Spark same-site check:** one mid-walk frame from this visit and the last one. On two runs of the test clip it answered "same", naming the cell mast, rooftops, tree line, stains and vent holes. A "different" answer holds the visit.
+- **Muse Spark site notes:** four frames spread along the walk give a stage, up to four observations tied to frame numbers, and a summary. The first run called the drainage vents "open holes at the base"; the prompt now says regular low openings are usually vents. Notes never change the verdict.
+- **Small bug caught in e2e:** a visit whose code wasn't read said "this spot is now the site pin" but correctly didn't write the pin. The note now says it couldn't pin.
+- **Code alphabet:** Q dropped after it was read as P on a real walk.
+- **SAM isn't perfectly repeatable:** re-running SAM on the 117 stills of `vis_77d1c43227e3` gave 235 confirmed / 22 seen once against production's 236 / 21 (same 257 blocks in total). On the 88 stills of `vis_62077ef1a92a` a re-run matched production exactly. Reports store their own numbers and are never recomputed.
+- **Home page replay:** `npm run showcase` turns a stored visit into 59 small stills (1.26 MB) with SAM's boxes and the running count; the receipt quotes the production report.

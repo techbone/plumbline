@@ -4,88 +4,132 @@
 
 ## Pitch
 
-Nigerians abroad (and in Abuja or Lagos) build houses in their hometowns through a relative or a contractor they can't supervise. Proof of progress today is a WhatsApp photo, and the documented failure mode is years of photos of someone else's house. Plumbline turns a two-minute site visit into a count you can audit. The foreman walks the wall with a one-time visit code and the phone sends stills, not video. SAM 3.1 counts blocks, columns, openings and block stacks with pixel masks. Muse Spark compares the result against the bill of quantities (BOQ) and the previous visit. The owner gets a per-milestone verdict ("Verified: 1,742 of 1,800 blocks") before releasing the next tranche.
+Nigerians abroad (and in Abuja or Lagos) build houses in their hometowns through a relative or a contractor they can't supervise. Proof of progress today is a WhatsApp photo, and the documented failure mode is years of photos of someone else's house. Plumbline turns a phone walk along a wall into a block count you can audit. The foreman writes a one-time code on a block, films it, and walks the wall; the phone sends a still every half second instead of a video. SAM 3.1 finds every block in every still while the walk is happening, our stitching joins the stills into one wall so each block counts once, and Muse Spark reads the code blind, checks it's the same site as last time and writes site notes. The owner gets a verdict per milestone ("Verified: 236 of 230 blocks confirmed") before releasing the next payment.
 
-**What makes it different:** enterprise tools (Buildots, OpenSpace, Roboflow) serve construction firms with 360° cameras and models trained per site. The diaspora services (BuildPanda, Track Your Build) rely on human inspectors and daily logs. Plumbline is the first that gives a homeowner a count produced by segmentation rather than an LLM's guess, with no training data, from a phone.
+**What makes it different:** enterprise tools (Buildots, OpenSpace, Roboflow) serve construction firms with 360° cameras and per-site models. The diaspora services (BuildPanda, Track Your Build) rely on human inspectors and daily logs. Plumbline gives a homeowner a count produced by segmentation rather than an LLM's guess, from an ordinary phone, with no training data and no app install.
 
 ## Problem and sponsor fit
 
 - **Who:** a diaspora owner funding a 3–4 bedroom bungalow in their home state, paying a contractor or relative in tranches.
 - **Workaround today:** WhatsApp photos and video calls, occasional visits by a cousin, trust.
 - **Cost:** a whole build budget. Documented cases include a brother sending photos of another person's house for 10 years ([Legit.ng](https://www.legit.ng/1212279-man-returns-nigeria-10-years-finds-brother-lied-building-a-duplex-him.html)) and family embezzling project funds for 6 years ([Gistreel](https://www.gistreel.com/betrayed-for-6-years-nigerian-man-heartbroken-as-he-discovers-family-embezzled-house-project-funds/)). Ownkey's guidance says to demand live video walkthroughs and to watch for "the same angle" repeating ([Ownkey](https://ownkey.com/ng/blog/building-house-nigeria-from-abroad-avoid-contractor-fraud)).
-- **Sponsor removal test:** without SAM 3.1, counts become an LLM's estimate (LLMs are poor counters, and we measure this in `docs/evidence/counting-eval.md`). Without Muse Spark, nothing maps the counts to the BOQ, judges the build stage, or decides whether this is the same site as last visit. The core flow stops working.
+- **Sponsor removal test:** without SAM 3.1 there is no count, only an estimate; the stitching has nothing to merge. Without Muse Spark nothing proves the walk was filmed today for this visit (the blind code read), nothing notices a different site, and the owner gets numbers without context. The core flow stops working.
 
 ### Capability map
 
 | User flow | What happens | Meta model / call |
 |---|---|---|
-| Owner sets milestones from a BOQ | BOQ PDF → structured milestone targets (blocks, columns, openings) | Muse Spark 1.3, `POST /v1/responses`, PDF input, JSON schema output |
-| Foreman proves the visit is live | One-time code written on a block / held to camera and spoken | Muse Spark 1.3 (frames: is code `K74Q` visible?) + Muse Voice Transcribe `POST /v1/asr/transcribe` (spoken code, English) |
-| Count laid blocks per elevation | Still per wall face → instance masks → count | SAM 3.1 image, `POST /v1/responses`, prompt `"concrete block"` |
-| Count openings (vents, windows, doors) and pillars per elevation | Straight-on stills or keyframes pulled from the walkthrough → instance masks | SAM 3.1 image, prompts such as `"hollow block opening"`, `"vertical concrete column"` |
-| Continuity track over the walkthrough (optional, precomputed) | Walkthrough video → blocks keep their identity across frames | SAM 3.1 video, `input_video` via Files API |
-| Same site as last time? What changed? | Baseline frames vs this visit's frames | Muse Spark 1.3, multi-image input |
-| Stage verdict against milestone | Counts + frames + BOQ → verdict and gaps | Muse Spark 1.3, structured output |
+| Count blocks while the foreman walks | Each still → instance boxes → count, as it arrives | SAM 3.1 image mode, `POST /v1/responses`, model `sam-3.1`, prompt `"concrete block"` (`src/lib/meta/sam.ts`) |
+| Prove the walk is today's | Opening frames → the code written on a block, read without being told what to expect | Muse Spark 1.3, `POST /v1/responses`, multi-image input, JSON reply (`src/lib/pipeline/liveness.ts`) |
+| Same site as last time? | A mid-walk frame from this visit and the last one → compare fixed landmarks | Muse Spark 1.3, two images (`src/lib/pipeline/site-notes.ts`) |
+| What should the owner know? | Four frames spread along the walk → stage, visible defects with frame numbers, plain summary | Muse Spark 1.3, four images (`src/lib/pipeline/site-notes.ts`) |
 
-Our own deterministic code: the area cross-check (wall-mask area ÷ median block-face area vs instance count), perceptual-hash reuse detection across visits, and the milestone release rule.
+Our own deterministic code (`src/lib/verify/`, unit-tested): frame-to-frame shift estimation and sighting merge (stitching), the close-up filter, GPS distance to the site pin, and the release rule.
 
 ## System overview
 
 ```mermaid
 flowchart LR
-  F[Foreman phone<br/>stills every 0.5 s] -->|JPEG frames + signed ticket| API[Next.js route handlers on Vercel]
-  O[Owner<br/>/r/visit-id] --> API
-  API --> BLOB[(Vercel Blob<br/>frames, counts, report)]
-  API --> SAM[SAM 3.1<br/>image mode]
-  API --> SPARK[Muse Spark 1.3<br/>reads the visit code]
+  F[Foreman phone<br/>still every 0.5 s + GPS] -->|JPEG frames, signed ticket| API[Next.js route handlers on Vercel]
+  O[Owner<br/>/p/site · /r/visit] --> API
+  API --> BLOB[(Vercel Blob<br/>write-once objects)]
+  API --> SAM[SAM 3.1<br/>image mode, per frame]
+  API --> SPARK[Muse Spark 1.3<br/>code, same site, notes]
 ```
 
-The phone never uploads a video. It grabs a still every half second while the foreman walks (shortest side 540 px, JPEG), and each frame is sent as its own small request. A 31 s walk is about 9 MB, against 29 MB for the same video shrunk to 540p and 94 MB as the phone recorded it. That keeps every request under serverless limits, keeps mobile data use low (data is expensive in Nigeria, and a cap on size also caps abuse and cost), and lets SAM count while the walk is still happening.
+```mermaid
+sequenceDiagram
+  participant P as Phone
+  participant S as Server
+  participant SAM as SAM 3.1
+  participant MS as Muse Spark
+  P->>S: POST /api/visits (site link)
+  S-->>P: visit id, code "VRKE", signed ticket
+  loop every 0.5 s while walking
+    P->>S: PUT frames/k (JPEG + ticket)
+    S->>SAM: segment "concrete block"
+    SAM-->>S: boxes
+    S-->>P: blocks in this frame
+  end
+  P->>S: POST finish (ticket + best GPS fix)
+  S->>S: reload frames and counts from storage, stitch
+  par
+    S->>MS: read the code (blind)
+    S->>MS: same site as last visit?
+    S->>MS: site notes
+  end
+  S->>S: GPS vs site pin, release rule
+  S-->>P: report /r/visit-id
+```
+
+The phone never uploads a video. It grabs a still every half second (shortest side 540 px, JPEG) and sends each as its own small request. That keeps every request under serverless limits, keeps mobile data bounded, and lets SAM count while the walk is still happening. Measured: a 31 s walk of the test clip is 9.3 MB of stills against 29 MB for the 540p video and 94 MB as recorded; real phone walks on rough concrete run about 270 KB a still (24 MB for 44 s).
 
 ## Components
 
-- **Web app (Next.js 15, App Router):** `/v/<token>` the foreman's capture flow, `/r/<visit-id>` the shareable owner report (anyone with the link can read it; the id is unguessable).
+- **Web app (Next.js 15, App Router):**
+  - `/` home, with a replay of a real counted walk (`public/showcase`, built by `npm run showcase`).
+  - `/new` set up a test site (name, block target, payment).
+  - `/p/<token>` the owner's site page: foreman link with QR and WhatsApp share, every visit with its verdict.
+  - `/v/<token>` the foreman's capture flow: code, full-screen camera with live block count, processing with named steps, receipt.
+  - `/r/<visit-id>` the shareable report: verdict, checks, site notes, the stitched wall with every block numbered.
 - **`/api/visits`:** issues a signed ticket (visit id, one-time code, expiry, HMAC). No database: every later call is checked against the signature.
-- **`/api/visits/<id>/frames/<k>`:** receives one JPEG, stores it, runs SAM 3.1 `"concrete block"`, stores the boxes, returns the count (limits: 240 frames, 1.5 MB each).
-- **`/api/visits/<id>/finish`:** reads frames and counts back from storage (never from the phone), decodes small grey copies in plain JavaScript, estimates the shift between frames, merges sightings into unique blocks, asks Muse Spark to read the visit code blind, applies the release rule, writes the report.
-- **`src/lib/meta/`:** the only code that talks to Meta. **`src/lib/verify/`:** pure functions (stitching, area cross-check, release rule), unit-tested.
+- **`/api/visits/<id>/frames/<k>`:** receives one JPEG, stores it, runs SAM 3.1, stores the boxes, returns the count (limits: 240 frames, 1.5 MB each).
+- **`/api/visits/<id>/finish`:** reloads frames and counts from storage (never from the phone), stitches, runs the three Muse Spark calls in parallel with each other, checks GPS against the site pin, applies the release rule, writes the report and a line in the site's history.
+- **`/api/projects`:** creates a test site from the `/new` form.
+- **`src/lib/meta/`:** the only code that talks to Meta. **`src/lib/verify/`:** pure functions, unit-tested. **`src/lib/pipeline/`:** the visit pipeline.
 
 ## Data model
 
-No database. Projects and milestones are code (`src/lib/projects.ts`). Everything a visit produces is one write-once object in Vercel Blob (local folder in dev):
+No database. The demo site is code (`src/lib/projects.ts`); everything else is one write-once object in Vercel Blob (a local folder in dev):
 
+- `projects/<id>/project.json`: a test site made on `/new`
+- `projects/<id>/pin.json`: the site pin, set by the first visit with a precise GPS fix and a readable code
+- `projects/<id>/visits/<visit-id>.json`: one line of the site's history
 - `visits/<id>/meta.json`: ticket plus project and milestone text
-- `visits/<id>/frames/0000.jpg ...`: keyframes
-- `visits/<id>/sam/0000.json ...`: SAM boxes per frame
-- `visits/<id>/result.json`: stitched blocks, code check, verdict
+- `visits/<id>/frames/0000.jpg ...`: stills
+- `visits/<id>/sam/0000.json ...`: SAM boxes per still
+- `visits/<id>/result.json`: stitched blocks, checks, site notes, verdict
+
+## Release rule
+
+`decide()` in `src/lib/pipeline/verdict.ts`, in order:
+
+1. Code not read (or more than one character off) → **not verified**, whatever the count.
+2. Confirmed (seen in 2+ stills) ≥ target → **verified**, or **review** if the code was one character off.
+3. Confirmed + seen-once ≥ target → **review** (a person checks the seen-once blocks).
+4. Otherwise → **short**.
+5. Any held check (GPS far from the pin or missing, Spark says a different site) turns **verified** into **review**. Holds never soften short or not verified.
+
+Site notes never change the verdict.
 
 ## Key flows (the demo)
 
-1. **Visit with a live code.** Foreman opens the capture link → gets code `K74Q` (valid 30 min) → writes it on a block → films a 60–90 s walkthrough and four elevation stills → uploads. Pipeline: liveness ✓ → reuse ✓ → site match ✓ → counts → cross-check → verdict.
-2. **The count you can audit.** On the owner's report, each elevation shows the SAM masks numbered 1…n, alongside the instance count, the area estimate, and whether they agree. Openings and pillars are counted per elevation still. The walkthrough replay with tracked blocks is a continuity view, precomputed rather than run live.
-3. **The lie gets caught.** Resubmitting last week's footage fails the reuse step, another site's photos fail site match, and a missing code fails liveness. The tranche stays locked and the report says exactly why.
+1. **A visit with a live code.** Owner sends the foreman link → foreman gets code `VRKE` (valid 30 min) → writes it on paper or a block → films it, then walks the wall while the live count climbs → report in about a minute.
+2. **The count you can audit.** The report lays every still on one wall and numbers each block; solid means seen in two or more stills, amber means seen once and needs an eye.
+3. **The lie gets caught.** A hand-written Q read as P held a real visit; an old video can't carry today's code; a walk filmed away from the site pin, or at a different site, can't be verified.
 
 ## Stack choices
 
-- **Next.js + TypeScript on Vercel's free plan:** one deploy for the capture flow, report and API.
-- **Stills, not video, from the phone:** a 30 to 90 MB video can't pass through a function (about 4.5 MB request limit) and costs data. Stills are about 9 MB for a 31 s walk and let counting run live.
-- **Vercel Blob, no database:** the only state is write-once files; the signed ticket replaces a visit table.
-- **Pure-JS JPEG decode (`jpeg-js`), no ffmpeg on the server:** the stitching needs only small grey frames. `ffmpeg-static` stays as a dev dependency for the local scripts.
-- **SAM image mode for every count:** video tracking caps at 16 objects per frame and took 4 to 30 minutes per prompt on a 31 s clip (see `docs/build-log.md`).
+- **Next.js + TypeScript on Vercel's free plan:** one deploy for capture, reports and API.
+- **Stills, not video, from the phone:** a 30–90 MB video can't pass through a function (about 4.5 MB request limit) and costs data. Stills let counting run live.
+- **Vercel Blob, no database:** the only state is write-once objects; the signed ticket replaces a visit table.
+- **Pure-JS JPEG decode (`jpeg-js`), no ffmpeg on the server:** stitching needs only small grey copies. `ffmpeg-static` is a dev dependency for scripts.
+- **SAM image mode for every count:** video tracking caps at 16 objects per frame and took 4–30 minutes per prompt on a 31 s clip (see `docs/build-log.md`).
 
 ## Out of scope
 
-- Moving money. We record a release recommendation per milestone; no payment rail.
-- Accounts and auth beyond unguessable project/capture links.
-- Native mobile apps, offline capture, multi-language UI.
-- Structural engineering judgement (rebar spacing, concrete strength). We count and compare; we don't certify safety.
+- Moving money. The report records a release recommendation per milestone; no payment rail.
+- Accounts. Sites and reports are protected only by unguessable links; on a test site the foreman link and the owner page share one key.
+- GPS integrity. The fix comes from the phone and can be spoofed; it catches the lazy fake, not a determined one.
+- Bill of quantities parsing, spoken codes (Muse Voice has no Yoruba, Hausa, Igbo or Pidgin), columns and openings in the walk count, native apps, offline capture.
+- Structural judgement. We count and compare; we don't certify safety.
 
 ## Milestones
 
-| # | Target date | Ships |
+| # | Date | Shipped |
 |---|---|---|
-| M1 | Oct 30 | SAM spike on real block-wall stills; upload one elevation → instance count + numbered mask overlay + area cross-check. Deployed. |
-| M2 | Oct 31 | Visit capture flow (code, walkthrough, 4 elevations); video tracking for columns/openings/stacks; named pipeline steps persisted and polled. |
-| M3 | Nov 1 | Muse Spark: BOQ → milestones, liveness code check, site match, stage assessment; ASR spoken-code check. |
-| M4 | Nov 2 | Owner report + milestone verdicts; reuse detection; seeded demo project; `npm run e2e` with evidence. |
-| M5 | Nov 3 | Counting eval (SAM vs hand count vs Spark-only), README, demo script; record on Nov 4 morning, submit by Nov 4 12:00 ET. |
+| M1 | Oct 29 | SAM spike on real block-wall stills; video tracking ruled out; walk-along stitching built and measured. |
+| M2 | Oct 29–30 | Foreman capture flow (code, camera, live count), stills to Vercel Blob, signed tickets, report with stitched wall. Deployed. |
+| M3 | Oct 30 | First phone walks on the live app; close-up filter; iOS camera fixes. |
+| M4 | Oct 30 | GPS site pin, Muse Spark same-site check and site notes, test sites, owner timeline, home page replay. |
+| M5 | Nov 1–3 | Hand-count accuracy check, README, demo video; submit by Nov 4 12:00 ET. |
