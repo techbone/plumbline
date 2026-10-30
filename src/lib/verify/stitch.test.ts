@@ -1,6 +1,6 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
-import { chainOffsets, estimateShift, mergeSightings, type Gray } from "./stitch";
+import { chainOffsets, estimateShift, mergeSightings, steadyFrames, type Gray } from "./stitch";
 
 function texture(w: number, h: number, seed = 7): Uint8Array {
   const out = new Uint8Array(w * h);
@@ -63,4 +63,11 @@ test("two blocks in the same frame never merge, however close", () => {
     { width: 500, height: 800 },
   );
   assert.equal(clusters.length, 2);
+});
+
+test("drops close-up frames taken while stepping back from the code block", () => {
+  const row = (h: number, n: number) => Array.from({ length: n }, (_, i) => ({ left: i * 100, top: 0, right: i * 100 + 2 * h, bottom: h }));
+  // Two close-ups (blocks ~100 px tall), then the walk (~47 px), and an empty frame.
+  const used = steadyFrames([row(110, 2), row(85, 4), row(48, 20), row(45, 22), row(50, 18), [], row(47, 25)]);
+  assert.deepEqual(used, [false, false, true, true, true, false, true]);
 });

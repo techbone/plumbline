@@ -108,6 +108,25 @@ export function mergeSightings(
   return clusters;
 }
 
+/**
+ * Which frames sit at walking distance. The walk is stitched as a pure slide, so
+ * frames taken while stepping back from the code block (blocks drawn bigger)
+ * would land at the wrong scale and count the same blocks twice. A frame is kept
+ * when its median block height is within `tolerance` of the walk's typical one.
+ */
+export function steadyFrames(boxesPerFrame: Box[][], tolerance = 1.35): boolean[] {
+  const medians = boxesPerFrame.map((boxes) => median(boxes.map((b) => b.bottom - b.top)));
+  const typical = median(medians.filter((m) => m > 0));
+  return medians.map((m) => m > 0 && m <= typical * tolerance && m >= typical / tolerance);
+}
+
+function median(xs: number[]): number {
+  if (!xs.length) return 0;
+  const s = [...xs].sort((a, b) => a - b);
+  const mid = s.length >> 1;
+  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+}
+
 /** Chain pairwise shifts into absolute offsets (frame 0 at the origin). */
 export function chainOffsets(shifts: { dx: number; dy: number }[], scale = 1): { x: number; y: number }[] {
   const out = [{ x: 0, y: 0 }];

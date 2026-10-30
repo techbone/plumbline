@@ -1,4 +1,4 @@
-import { chainOffsets, estimateShift, mergeSightings, type Box, type Cluster, type Gray } from "../verify/stitch";
+import { chainOffsets, estimateShift, mergeSightings, steadyFrames, type Box, type Cluster, type Gray } from "../verify/stitch";
 
 export type FrameCount = {
   k: number;
@@ -15,6 +15,8 @@ export type WalkCount = {
   clusters: Cluster[];
   confirmed: number;
   review: number;
+  /** Frames taken at walking distance and used for the count. */
+  used: boolean[];
 };
 
 /** Place every frame on one wall map and merge sightings of the same block. */
@@ -24,8 +26,9 @@ export function stitchWalk(frames: FrameCount[], grays: Gray[]): WalkCount {
   const scale = frameSize.width / grays[0].width;
   const shifts = grays.slice(1).map((g, k) => estimateShift(grays[k], g));
   const offsets = chainOffsets(shifts, scale);
+  const used = steadyFrames(frames.map((f) => f.boxes));
   const clusters = mergeSightings(
-    frames.map((f, k) => ({ boxes: f.boxes, offset: offsets[k] })),
+    frames.map((f, k) => ({ boxes: used[k] ? f.boxes : [], offset: offsets[k] })),
     frameSize,
   );
   const confirmed = clusters.filter((c) => c.sightings.length >= 2).length;
@@ -36,6 +39,7 @@ export function stitchWalk(frames: FrameCount[], grays: Gray[]): WalkCount {
     clusters,
     confirmed,
     review: clusters.length - confirmed,
+    used,
   };
 }
 

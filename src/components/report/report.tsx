@@ -80,7 +80,7 @@ export function Report({ result: r }: { result: VisitResult }) {
               ok={r.review <= r.confirmed * 0.15}
               warn={r.review > r.confirmed * 0.15}
               title="Walk stitched into one wall"
-              body={`${r.keyframes} frames joined; ${r.confirmed} blocks seen in two or more frames, ${r.review} seen once.`}
+              body={`${r.framesUsed !== undefined && r.framesUsed < r.keyframes ? `${r.framesUsed} of ${r.keyframes} frames joined (close-ups of the code left out)` : `${r.keyframes} frames joined`}; ${r.confirmed} blocks seen in two or more frames, ${r.review} seen once.`}
             />
             <Check4
               ok={r.confirmed >= r.meta.target}

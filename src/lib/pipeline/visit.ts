@@ -18,6 +18,8 @@ export type VisitResult = {
   finishedAt: string;
   meta: VisitMeta;
   keyframes: number;
+  /** Frames at walking distance that went into the count (older reports lack it). */
+  framesUsed?: number;
   uploadedBytes: number;
   frameSize: { width: number; height: number };
   offsets: { x: number; y: number }[];
@@ -97,6 +99,7 @@ export async function finishVisit(ticket: Ticket): Promise<VisitResult> {
     finishedAt: new Date().toISOString(),
     meta,
     keyframes: counts.length,
+    framesUsed: walk.used.filter(Boolean).length,
     uploadedBytes: jpgs.reduce((a, j) => a + j.length, 0),
     frameSize: walk.frameSize,
     offsets: walk.offsets.map((o) => ({ x: Math.round(o.x), y: Math.round(o.y) })),

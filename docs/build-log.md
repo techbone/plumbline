@@ -52,3 +52,13 @@ Dead ends, surprises from the Meta API, the path chosen, and the test that guard
 - **Wrong estimate corrected:** I first said about 4 MB; the real figure is 9.3 MB (about 148 KB a frame).
 - **Self-inflicted bug:** adding `VISIT_SECRET` to `.env.local` mid-run changed the signing key and later frames got `401 Invalid visit ticket`. Not a code bug; rerunning after a restart passed.
 - **Guard:** `scripts/e2e.ts` (same HTTP calls as the phone), `docs/evidence/e2e/`, `verdict.test.ts`.
+
+## 2026-10-30 — First real phone walks on the deployed app
+
+- **Walk 1 (`vis_60c648d2e671`):** the handwritten code "G3QH" was read as "G3PH" (the Q had a vertical stroke). One character off gave "needs a check", as designed. 68 frames, 16.9 MB.
+- **Walk 2 (`vis_62077ef1a92a`):** code "74RV" read correctly, 88 frames, 24.4 MB, 245 confirmed and 35 to check, verified against the 230 target.
+- **Surprise:** the walk began with a close-up of the code block and the foreman stepping back. Blocks in those frames were drawn 2 to 6 times bigger (median height 309 px falling to about 56 px), and since stitching assumes a pure sideways slide, they landed on the wall map at the wrong scale and counted blocks twice.
+- **Fix:** `steadyFrames` keeps only frames whose median block height is within 1.35x of the walk's typical height. Replaying walk 2 locally (`npm run replay`; SAM gave identical boxes to production) gives 239 confirmed and 29 to check, so 12 double counts were removed. 62 of 88 frames were used.
+- **Also seen:** frames are about 280 KB each on rough concrete, against 148 KB on the fence test clip, so a 44 s walk is 24 MB. A few loose stones on the ground were picked up as blocks, mostly in the seen-once group.
+- **Camera on iOS Safari:** `object-fit: cover` wasn't applied to the live stream, so the preview was a small picture in a black frame. It's now sized by hand every frame and hidden until measured. The camera restarts when the tab comes back, and a walk that's interrupted by leaving the tab ends with the frames already sent.
+- **Guard:** `stitch.test.ts` (close-up frames dropped).
