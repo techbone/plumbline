@@ -13,7 +13,8 @@
     "spike:video": "tsx --env-file-if-exists=.env.local scripts/video-spike.ts",
     "walk": "tsx --env-file-if-exists=.env.local scripts/walk-count.ts",
     "e2e": "tsx --env-file-if-exists=.env.local scripts/e2e.ts",
-    "replay": "tsx --env-file-if-exists=.env.local scripts/replay.ts"
+    "replay": "tsx --env-file-if-exists=.env.local scripts/replay.ts",
+    "showcase": "tsx scripts/build-showcase.ts"
   },
   "dependencies": {
     "@meta-sam/parser": "^0.1.0",
