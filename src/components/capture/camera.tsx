@@ -41,6 +41,29 @@ export function Camera({
   const [phase, setPhase] = useState<Phase>("starting");
   const [error, setError] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
+  const [cover, setCover] = useState<{ w: number; h: number } | null>(null);
+
+  // Size the preview to cover the screen by hand: iOS Safari doesn't always apply
+  // object-fit to a camera stream, which leaves a small picture in a black frame.
+  useEffect(() => {
+    const v = videoEl.current;
+    if (!v) return;
+    const fit = () => {
+      const vw = v.videoWidth;
+      const vh = v.videoHeight;
+      if (!vw || !vh) return;
+      const scale = Math.max(window.innerWidth / vw, window.innerHeight / vh);
+      setCover({ w: Math.ceil(vw * scale), h: Math.ceil(vh * scale) });
+    };
+    v.addEventListener("loadedmetadata", fit);
+    v.addEventListener("resize", fit);
+    window.addEventListener("resize", fit);
+    return () => {
+      v.removeEventListener("loadedmetadata", fit);
+      v.removeEventListener("resize", fit);
+      window.removeEventListener("resize", fit);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -135,14 +158,24 @@ export function Camera({
   }
 
   return (
-    <main className="fixed inset-0 overflow-hidden bg-black text-white">
-      <video ref={videoEl} muted playsInline autoPlay className="absolute inset-0 h-full w-full object-cover" />
+    <main
+      onContextMenu={(e) => e.preventDefault()}
+      className="fixed inset-0 touch-manipulation select-none overflow-hidden bg-black text-white [-webkit-touch-callout:none]"
+    >
+      <video
+        ref={videoEl}
+        muted
+        playsInline
+        autoPlay
+        className="absolute left-1/2 top-1/2 max-w-none -translate-x-1/2 -translate-y-1/2"
+        style={cover ? { width: cover.w, height: cover.h } : { width: "100%", height: "100%", objectFit: "cover" }}
+      />
 
-      <div className="pointer-events-none absolute inset-x-0 top-[24%] border-t border-dashed border-white/45">
-        <span className="absolute -top-6 left-4 text-[11px] uppercase tracking-[0.08em] text-white/70">Top of wall</span>
+      <div className="pointer-events-none absolute inset-x-0 top-[16%] border-t border-dashed border-white/45">
+        <span className="absolute top-1.5 left-4 text-[11px] uppercase tracking-[0.08em] text-white/70">Top of wall</span>
       </div>
-      <div className="pointer-events-none absolute inset-x-0 top-[76%] border-t border-dashed border-white/45">
-        <span className="absolute top-1.5 left-4 text-[11px] uppercase tracking-[0.08em] text-white/70">Ground</span>
+      <div className="pointer-events-none absolute inset-x-0 top-[64%] border-t border-dashed border-white/45">
+        <span className="absolute -top-6 left-4 text-[11px] uppercase tracking-[0.08em] text-white/70">Ground</span>
       </div>
 
       <div className="absolute inset-x-0 top-0 flex items-center justify-between bg-gradient-to-b from-black/60 to-transparent px-4 pb-10 pt-[max(14px,env(safe-area-inset-top))]">
