@@ -1,22 +1,25 @@
 {
-  "visitId": "vis_43af2b6ef7f6",
-  "finishedAt": "2026-10-29T16:59:31.368Z",
+  "visitId": "vis_1090712a0966",
+  "finishedAt": "2026-10-30T12:19:24.952Z",
   "meta": {
-    "visitId": "vis_43af2b6ef7f6",
-    "code": "TKQM",
-    "projectId": "prj_demo",
-    "milestoneId": "ms_fence",
-    "issuedAt": 1793293056741,
-    "expiresAt": 1793294856741,
-    "projectName": "Boundary wall and bungalow",
-    "site": "Plot 14, Kuje, Abuja",
-    "owner": "Musa E.",
-    "milestoneTitle": "Boundary wall, east run",
-    "target": 230,
-    "trancheNgn": 1150000,
-    "kind": "blocks"
+    "visitId": "vis_1090712a0966",
+    "code": "EKJH",
+    "projectId": "p_ed588a8f99",
+    "milestoneId": "ms_1",
+    "issuedAt": 1793362651526,
+    "expiresAt": 1793364451526,
+    "projectName": "E2E wall",
+    "site": "Local",
+    "owner": "Test",
+    "milestoneTitle": "Fence front",
+    "target": 200,
+    "trancheNgn": 500000,
+    "kind": "blocks",
+    "projectToken": "p_ed588a8f99",
+    "sandbox": true
   },
   "keyframes": 63,
+  "framesUsed": 63,
   "uploadedBytes": 9300644,
   "frameSize": {
     "width": 540,
@@ -28,7 +31,7 @@
     45,
     46,
     44,
-    43,
+    44,
     37,
     36,
     34,
@@ -38,11 +41,11 @@
     38,
     43,
     44,
-    43,
+    44,
     42,
     38,
     38,
-    35,
+    34,
     36,
     35,
     33,
@@ -76,7 +79,7 @@
     36,
     35,
     35,
-    31,
+    30,
     32,
     29,
     29,
@@ -88,13 +91,38 @@
     28
   ],
   "confirmed": 225,
-  "review": 15,
+  "review": 16,
   "code": {
     "status": "failed",
     "read": null,
     "frame": null,
     "matched": 0,
     "note": "No visit code visible in the opening frames"
+  },
+  "location": {
+    "status": "review",
+    "distanceM": 0,
+    "accuracyM": 20,
+    "note": "Not pinned: a visit without a readable code can't set the site pin"
+  },
+  "sameSite": {
+    "status": "same",
+    "note": "Matched cell mast, distant rooftops, tree line, wall block stains and vent holes, and foreground grass all align perfectly.",
+    "previousVisitId": "vis_f534f450df17"
+  },
+  "notes": {
+    "stage": "sandcrete block wall, unplastered",
+    "summary": "The wall is standing and unplastered with vents near the base in one section. There is a small hole in one place and vegetation along the base.",
+    "observations": [
+      {
+        "text": "vegetation growing against the base of the wall",
+        "frame": 7
+      },
+      {
+        "text": "small hole through the face of the wall",
+        "frame": 55
+      }
+    ]
   },
   "verdict": {
     "status": "not_verified",
@@ -103,6 +131,6 @@
       "No visit code visible in the opening frames"
     ]
   },
-  "blockCount": 240,
-  "seconds": 115.099
+  "blockCount": 241,
+  "seconds": 113.578
 }

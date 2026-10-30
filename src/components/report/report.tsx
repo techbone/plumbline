@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Link2, ScanLine, TriangleAlert, X } from "lucide-react";
+import { Check, History, Link2, NotebookPen, ScanLine, TriangleAlert, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Logo } from "@/components/logo";
 import { Card, Eyebrow, naira } from "@/components/ui";
@@ -21,21 +21,32 @@ export function Report({ result: r }: { result: VisitResult }) {
 
   return (
     <main className="mx-auto min-h-[100dvh] max-w-[1200px] px-4 pb-16 pt-5 sm:px-8">
-      <header className="flex h-11 items-center justify-between">
+      <header className="flex h-11 items-center justify-between gap-2">
         <Logo />
-        <button
-          onClick={async () => {
-            try {
-              await navigator.clipboard.writeText(window.location.href);
-              setCopied(true);
-              setTimeout(() => setCopied(false), 1800);
-            } catch {}
-          }}
-          className="inline-flex h-9 items-center gap-2 rounded-[6px] border border-line bg-surface px-3 text-[13px] font-medium"
-        >
-          <Link2 size={15} strokeWidth={1.75} />
-          {copied ? "Link copied" : "Share report"}
-        </button>
+        <div className="flex items-center gap-2">
+          {r.meta.projectToken && (
+            <a
+              href={`/p/${r.meta.projectToken}`}
+              className="inline-flex h-9 items-center gap-2 rounded-[6px] border border-line bg-surface px-3 text-[13px] font-medium"
+            >
+              <History size={15} strokeWidth={1.75} />
+              All visits
+            </a>
+          )}
+          <button
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(window.location.href);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 1800);
+              } catch {}
+            }}
+            className="inline-flex h-9 items-center gap-2 rounded-[6px] border border-line bg-surface px-3 text-[13px] font-medium"
+          >
+            <Link2 size={15} strokeWidth={1.75} />
+            {copied ? "Link copied" : "Share"}
+          </button>
+        </div>
       </header>
 
       <section className="grid grid-cols-1 gap-8 pt-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
@@ -92,7 +103,26 @@ export function Report({ result: r }: { result: VisitResult }) {
                   : `${r.confirmed} confirmed, ${r.meta.target - r.confirmed} short of ${r.meta.target}${r.review ? `; ${r.review} more seen once` : ""}.`
               }
             />
+            {r.location && (
+              <Check4
+                ok={r.location.status === "passed" || r.location.status === "pinned"}
+                warn={r.location.status === "review" || r.location.status === "missing"}
+                title="Filmed at the site"
+                body={`${r.location.note}. The location comes from the phone's GPS.`}
+              />
+            )}
+            {r.sameSite && (
+              <Check4
+                ok={r.sameSite.status === "same" || r.sameSite.status === "first"}
+                warn={r.sameSite.status === "unclear" || r.sameSite.status === "different"}
+                title={r.sameSite.status === "first" ? "Same site as last visit" : "Same site as last visit (Muse Spark)"}
+                body={r.sameSite.note}
+                link={r.sameSite.previousVisitId ? { href: `/r/${r.sameSite.previousVisitId}`, label: "Last visit" } : undefined}
+              />
+            )}
           </Card>
+
+          {r.notes && <SiteNotesCard notes={r.notes} visitId={r.visitId} />}
 
           <p className="mt-4 font-mono text-[12px] text-muted">
             {r.visitId} &middot; {new Date(r.finishedAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })} &middot;{" "}
@@ -115,7 +145,19 @@ function Fact({ label, value, tone }: { label: string; value: string; tone?: "ok
   );
 }
 
-function Check4({ ok, warn, title, body }: { ok: boolean; warn: boolean; title: string; body: string }) {
+function Check4({
+  ok,
+  warn,
+  title,
+  body,
+  link,
+}: {
+  ok: boolean;
+  warn: boolean;
+  title: string;
+  body: string;
+  link?: { href: string; label: string };
+}) {
   return (
     <div className="flex gap-3 p-4">
       {ok ? (
@@ -127,9 +169,52 @@ function Check4({ ok, warn, title, body }: { ok: boolean; warn: boolean; title: 
       )}
       <div>
         <p className="text-[14px] font-medium">{title}</p>
-        <p className="mt-0.5 text-[13px] leading-snug text-muted">{body}</p>
+        <p className="mt-0.5 text-[13px] leading-snug text-muted">
+          {body}
+          {link && (
+            <>
+              {" "}
+              <a href={link.href} className="text-text underline decoration-line underline-offset-2">
+                {link.label}
+              </a>
+            </>
+          )}
+        </p>
       </div>
     </div>
+  );
+}
+
+/** What Muse Spark saw along the walk. It informs the owner; the verdict comes from the checks above. */
+function SiteNotesCard({ notes, visitId }: { notes: NonNullable<VisitResult["notes"]>; visitId: string }) {
+  return (
+    <Card className="mt-4 p-4">
+      <Eyebrow className="flex items-center gap-1.5">
+        <NotebookPen size={14} strokeWidth={1.75} /> Site notes &middot; Muse Spark
+      </Eyebrow>
+      <p className="mt-2 text-[15px] font-medium">{notes.stage}</p>
+      <p className="mt-1 text-[14px] leading-snug text-muted">{notes.summary}</p>
+      {notes.observations.length > 0 && (
+        <ul className="mt-3 divide-y divide-line border-t border-line">
+          {notes.observations.map((o, i) => (
+            <li key={i} className="flex items-start justify-between gap-3 py-2.5 text-[13px]">
+              <span>{o.text}</span>
+              {o.frame !== null && (
+                <a
+                  href={`/api/visits/${visitId}/frames/${o.frame}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-mono tnum shrink-0 text-[12px] text-muted underline decoration-line underline-offset-2"
+                >
+                  frame {o.frame}
+                </a>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className="mt-3 text-[12px] text-muted">Notes don&rsquo;t change the verdict. They point at frames worth a look.</p>
+    </Card>
   );
 }
 
@@ -178,7 +263,6 @@ function WallMap({ result: r }: { result: VisitResult }) {
         >
           {showFrames &&
             shown.map((k) => (
-              // eslint-disable-next-line @next/next/no-img-element
               <image
                 key={k}
                 href={`/api/visits/${r.visitId}/frames/${k}`}

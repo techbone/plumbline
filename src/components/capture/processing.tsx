@@ -3,6 +3,7 @@
 import { Check, Circle, Link2, LoaderCircle, TriangleAlert, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Card, Eyebrow, naira } from "@/components/ui";
+import type { Fix } from "@/lib/client/location";
 import type { Uploader } from "@/lib/client/uploader";
 import type { VisitResult } from "@/lib/pipeline/visit";
 
@@ -19,12 +20,14 @@ export function Processing({
   uploader,
   tick,
   reading,
+  location,
 }: {
   visitId: string;
   ticket: string;
   uploader: Uploader;
   tick: number;
   reading?: { done: number; total: number } | null;
+  location: () => Fix | null;
 }) {
   const [phase, setPhase] = useState<Phase>("counting");
   const [result, setResult] = useState<VisitResult | null>(null);
@@ -43,7 +46,11 @@ export function Processing({
       }
       setPhase("finishing");
       try {
-        const res = await fetch(`/api/visits/${visitId}/finish`, { method: "POST", headers: { "x-visit-ticket": ticket } });
+        const res = await fetch(`/api/visits/${visitId}/finish`, {
+          method: "POST",
+          headers: { "x-visit-ticket": ticket, "content-type": "application/json" },
+          body: JSON.stringify({ location: location() }),
+        });
         const body = await res.json();
         if (!res.ok) throw new Error(body.error ?? "Couldn't finish the visit");
         setResult(body);
@@ -53,6 +60,7 @@ export function Processing({
         setPhase("failed");
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uploader, visitId, ticket, reading]);
 
   if (phase === "done" && result) return <Receipt result={result} />;
@@ -79,6 +87,7 @@ export function Processing({
       note: "",
     },
     { label: "Wall stitched", status: phase === "finishing" ? "running" : "pending", note: "" },
+    { label: "Location and site checked", status: phase === "finishing" ? "running" : "pending", note: location() ? `GPS ±${Math.round(location()!.accuracy)} m` : "" },
     { label: "Report ready", status: phase === "failed" ? "failed" : "pending", note: "" },
   ];
 
@@ -91,7 +100,9 @@ export function Processing({
       <p className="mt-2 text-[15px] text-muted">
         {phase === "failed"
           ? error
-          : "SAM 3.1 finds every block in every frame, then we join the walk into one wall and count each block once."}
+          : phase === "finishing"
+            ? "Joining the walk into one wall, reading the visit code, and checking this is the same site as last time."
+            : "SAM 3.1 finds every block in every frame, then we join the walk into one wall and count each block once."}
       </p>
 
       <Card className="mt-6 overflow-hidden">

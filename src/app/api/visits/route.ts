@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { saveMeta } from "@/lib/pipeline/visit";
-import { projectByToken } from "@/lib/projects";
+import { getProject } from "@/lib/projects";
 import { issueTicket } from "@/lib/ticket";
 
 export const runtime = "nodejs";
@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 /** Start a visit: issue a signed ticket with a one-time code the foreman must show on camera. */
 export async function POST(req: Request) {
   const { token, milestoneId } = (await req.json().catch(() => ({}))) as { token?: string; milestoneId?: string };
-  const project = token ? projectByToken(token) : undefined;
+  const project = token ? await getProject(token) : undefined;
   if (!project) return NextResponse.json({ error: "Unknown capture link" }, { status: 404 });
 
   try {

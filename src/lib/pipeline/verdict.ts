@@ -6,8 +6,18 @@ export type Verdict = {
   reasons: string[];
 };
 
-/** The release rule. Pure, so it's easy to test and to explain in the report. */
-export function decide(code: CodeCheck, confirmed: number, review: number, target?: number): Verdict {
+/**
+ * The release rule. Pure, so it's easy to test and to explain in the report.
+ * `holds` are other checks that didn't pass (location, same site): they never
+ * block a count, but a held visit can't be verified, only reviewed.
+ */
+export function decide(code: CodeCheck, confirmed: number, review: number, target?: number, holds: string[] = []): Verdict {
+  const v = decideCount(code, confirmed, review, target);
+  if (!holds.length || v.status === "not_verified") return v;
+  return { ...v, status: v.status === "verified" ? "review" : v.status, reasons: [...v.reasons, ...holds] };
+}
+
+function decideCount(code: CodeCheck, confirmed: number, review: number, target?: number): Verdict {
   const reasons: string[] = [];
   if (code.status === "failed") {
     reasons.push(code.note);

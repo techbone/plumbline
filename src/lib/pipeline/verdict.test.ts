@@ -26,3 +26,14 @@ test("below target even counting seen-once blocks is short", () => {
 test("a one-character code mismatch can't be verified, only reviewed", () => {
   assert.equal(decide(code("review"), 300, 0, 230).status, "review");
 });
+
+test("a held check (location, same site) turns verified into review", () => {
+  const v = decide(code("passed"), 240, 3, 230, ["Filmed 5.6 km from the site pin"]);
+  assert.equal(v.status, "review");
+  assert.match(v.reasons.join(), /5\.6 km/);
+});
+
+test("a hold doesn't soften a short count or a missing code", () => {
+  assert.equal(decide(code("passed"), 100, 0, 230, ["x"]).status, "short");
+  assert.equal(decide(code("failed"), 300, 0, 230, ["x"]).status, "not_verified");
+});

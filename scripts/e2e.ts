@@ -5,7 +5,8 @@
  *
  * Cuts frames from a video (2 per second, shortest side 540), sends each to the
  * server as the phone would, then asks for the verdict. Writes the report to
- * docs/evidence/e2e/.
+ * docs/evidence/e2e/. Set E2E_LOCATION=lat,lng,accuracy to send a GPS fix the
+ * way the phone does; without it the visit has no location and is held.
  */
 import { execFile } from "node:child_process";
 import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
@@ -65,7 +66,13 @@ async function main() {
   );
   console.log();
 
-  const fin = await fetch(`${base}/api/visits/${visit.visitId}/finish`, { method: "POST", headers: { "x-visit-ticket": visit.ticket } });
+  const [lat, lng, accuracy] = (process.env.E2E_LOCATION ?? "").split(",").map(Number);
+  const location = Number.isFinite(accuracy) ? { lat, lng, accuracy } : null;
+  const fin = await fetch(`${base}/api/visits/${visit.visitId}/finish`, {
+    method: "POST",
+    headers: { "x-visit-ticket": visit.ticket, "content-type": "application/json" },
+    body: JSON.stringify({ location }),
+  });
   const result = await fin.json();
   if (!fin.ok) throw new Error(`finish failed: ${JSON.stringify(result)}`);
 
@@ -79,6 +86,9 @@ async function main() {
     confirmed: result.confirmed,
     review: result.review,
     code: result.code,
+    location: result.location,
+    sameSite: result.sameSite,
+    notes: result.notes,
     uploadedMB: +(result.uploadedBytes / 1e6).toFixed(1),
     seconds: +((Date.now() - t0) / 1000).toFixed(0),
   }, null, 2));

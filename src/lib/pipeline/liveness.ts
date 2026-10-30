@@ -60,7 +60,7 @@ function normalise(s: string): string {
   return s.toUpperCase().replace(/[^A-Z0-9]/g, "");
 }
 
-function parseJson(text: string): Record<string, unknown> | null {
+export function parseJson(text: string): Record<string, unknown> | null {
   const m = text.match(/\{[\s\S]*\}/);
   if (!m) return null;
   try {

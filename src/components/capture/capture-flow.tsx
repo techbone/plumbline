@@ -8,6 +8,7 @@ import { Camera } from "./camera";
 import { Processing } from "./processing";
 import { framesFromFile } from "@/lib/client/frames";
 import { Uploader } from "@/lib/client/uploader";
+import { watchLocation, type Fix } from "@/lib/client/location";
 
 export type MilestoneView = { id: string; title: string; kind: string; target: number; tranche: number };
 type Visit = { visitId: string; code: string; expiresAt: string; ticket: string };
@@ -31,11 +32,20 @@ export function CaptureFlow({
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+  const fix = useRef<Fix | null>(null);
+  const stopWatch = useRef<(() => void) | null>(null);
   const milestone = milestones.find((m) => m.id === milestoneId);
+
+  useEffect(() => () => stopWatch.current?.(), []);
 
   async function start() {
     setStarting(true);
     setError(null);
+    // Ask for location on the tap (iOS wants a gesture) and keep the best fix
+    // while the foreman walks; it goes with the finished visit.
+    stopWatch.current?.();
+    fix.current = null;
+    stopWatch.current = watchLocation((f) => (fix.current = f));
     try {
       const res = await fetch("/api/visits", {
         method: "POST",
@@ -141,7 +151,7 @@ export function CaptureFlow({
               One slow step a second, phone upright, wall filling the screen.
             </HowTo>
             <HowTo n={3} icon={<Send size={16} strokeWidth={1.75} />} title="Send">
-              Counting runs while you walk, and {project.owner} gets the report.
+              Counting runs while you walk, and {project.owner} gets the report. The phone&rsquo;s location is sent with it.
             </HowTo>
           </ol>
 
@@ -169,7 +179,14 @@ export function CaptureFlow({
       )}
 
       {stage === "finish" && visit && uploader.current && (
-        <Processing visitId={visit.visitId} ticket={visit.ticket} uploader={uploader.current} tick={uploader.current.frames.length + uploader.current.counted} reading={reading} />
+        <Processing
+          visitId={visit.visitId}
+          ticket={visit.ticket}
+          uploader={uploader.current}
+          tick={uploader.current.frames.length + uploader.current.counted}
+          reading={reading}
+          location={() => fix.current}
+        />
       )}
     </main>
   );
