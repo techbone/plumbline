@@ -18,10 +18,17 @@ export default function Home() {
           wall and count each block once, and the milestone pays only when the count is there.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/v/demo" className="inline-flex h-11 items-center gap-2 rounded-[6px] bg-accent px-4 text-[15px] font-medium text-accent-ink">
-            Record a site visit <ArrowRight size={17} strokeWidth={1.75} />
+          <Link href="/new" className="inline-flex h-11 items-center gap-2 rounded-[6px] bg-accent px-4 text-[15px] font-medium text-accent-ink">
+            Try it on any block wall <ArrowRight size={17} strokeWidth={1.75} />
+          </Link>
+          <Link href="/p/demo" className="inline-flex h-11 items-center gap-2 rounded-[6px] border border-line bg-surface px-4 text-[15px] font-medium">
+            See the demo site
           </Link>
         </div>
+        <p className="mt-4 max-w-[60ch] text-[13px] leading-relaxed text-muted">
+          Trying it: set up a test site, scan the foreman link with your phone, write the code on paper, and walk any block wall for
+          20 to 40 seconds. The report is ready about a minute after you stop.
+        </p>
       </section>
     </main>
   );

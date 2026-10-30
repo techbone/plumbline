@@ -1,12 +1,12 @@
 import { notFound } from "next/navigation";
 import { CaptureFlow } from "@/components/capture/capture-flow";
-import { projectByToken } from "@/lib/projects";
+import { getProject } from "@/lib/projects";
 
 export const metadata = { title: "Site visit" };
 
 export default async function CapturePage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  const project = projectByToken(token);
+  const project = await getProject(token);
   if (!project) notFound();
 
   return (

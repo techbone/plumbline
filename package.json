@@ -22,6 +22,7 @@
     "lucide-react": "^1.64.0",
     "next": "15.5.28",
     "openai": "^7.45.1",
+    "qrcode": "^1.5.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "zod": "^4.6.7"
@@ -30,6 +31,7 @@
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

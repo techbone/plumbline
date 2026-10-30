@@ -59,8 +59,8 @@ export function readTicket(ticket: string | null, visitId: string): Ticket | nul
   }
 }
 
-/** Four characters with no look-alikes (0/O, 1/I/L), easy to chalk on a block. */
+/** Four characters with no look-alikes (0/O/Q, 1/I/L), easy to chalk on a block. */
 function visitCode(): string {
-  const alphabet = "ACDEFGHJKMNPQRTUVWXY34679";
+  const alphabet = "ACDEFGHJKMNPRTUVWXY34679";
   return Array.from(randomBytes(4), (b) => alphabet[b % alphabet.length]).join("");
 }
