@@ -35,6 +35,7 @@ const STEPS = [
 
 /** Real walks recorded on the deployed app, including the ones that didn't pass. */
 const WALKS = [
+  { id: "vis_55dbb8c2d7d2", what: "Fence, Karsana, 53 s walk", frames: 107, mb: 33.1, confirmed: 372, review: 45, code: "XKMX read", verdict: "Verified", tone: "ok" },
   { id: "vis_77d1c43227e3", what: "Boundary wall, 58 s walk", frames: 117, mb: 31.5, confirmed: 236, review: 21, code: "VRKE read", verdict: "Verified", tone: "ok" },
   { id: "vis_62077ef1a92a", what: "Boundary wall, 44 s walk", frames: 88, mb: 24.4, confirmed: 245, review: 35, code: "74RV read", verdict: "Verified", tone: "ok" },
   { id: "vis_60c648d2e671", what: "Boundary wall, 34 s walk", frames: 68, mb: 16.9, confirmed: 141, review: 13, code: "G3QH read as G3PH", verdict: "Short", tone: "bad" },
@@ -77,7 +78,7 @@ export default function Home() {
             </Link>
           </div>
           <dl className="mt-10 grid max-w-[560px] grid-cols-3 border-y border-line">
-            <Stat label="Blocks counted on one walk" value="236" />
+            <Stat label="Blocks counted on one walk" value="372" />
             <Stat label="Stills a second, no video" value="2" />
             <Stat label="Report after stopping" value="~1 min" />
           </dl>
