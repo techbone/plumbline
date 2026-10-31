@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRight, Check } from "lucide-react";
+import { ArrowUpRight, Check, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 type Showcase = {
@@ -37,10 +37,11 @@ export function WalkReplay() {
   const [receipt, setReceipt] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
-  const reduced = useRef(false);
+  // With Reduce Motion on (common on iPhones) the walk waits for a tap instead of autoplaying.
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
-    reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setPaused(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
     const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { threshold: 0.2 });
     if (root.current) io.observe(root.current);
     return () => io.disconnect();
@@ -53,22 +54,18 @@ export function WalkReplay() {
     (async () => {
       try {
         const s = (await (await fetch("/showcase/walk.json")).json()) as Showcase;
-        await Promise.all(
-          s.frames.map(
-            (f) =>
-              new Promise<void>((resolve) => {
-                const img = new Image();
-                img.onload = img.onerror = () => resolve();
-                img.src = `/showcase/${f.src}`;
-              }),
-          ),
+        // Decode every frame before playing, but don't wait more than a few seconds on a slow connection.
+        const loads = s.frames.map(
+          (f) =>
+            new Promise<void>((resolve) => {
+              const img = new Image();
+              img.onload = img.onerror = () => resolve();
+              img.src = `/showcase/${f.src}`;
+            }),
         );
+        await Promise.race([Promise.all(loads), new Promise((r) => setTimeout(r, 6000))]);
         if (cancelled) return;
         setData(s);
-        if (reduced.current) {
-          setI(s.frames.length - 1);
-          setReceipt(true);
-        }
         setReady(true);
       } catch {}
     })();
@@ -78,7 +75,7 @@ export function WalkReplay() {
   }, [visible, data]);
 
   useEffect(() => {
-    if (!data || !visible || reduced.current) return;
+    if (!data || !visible || paused) return;
     if (receipt) {
       const t = setTimeout(() => {
         setReceipt(false);
@@ -91,7 +88,7 @@ export function WalkReplay() {
       else setI(i + 1);
     }, 1000 / FPS);
     return () => clearTimeout(t);
-  }, [data, visible, i, receipt]);
+  }, [data, visible, paused, i, receipt]);
 
   const f = data?.frames[i];
   const onCode = !!data && !!f && !f.used && data.frames.slice(0, i + 1).every((x) => !x.used);
@@ -127,6 +124,16 @@ export function WalkReplay() {
                 </span>
               </div>
 
+              {paused && (
+                <button
+                  type="button"
+                  onClick={() => setPaused(false)}
+                  className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full bg-black/70 px-4 py-2.5 text-[13px] font-medium text-white"
+                >
+                  <Play size={14} strokeWidth={2} /> Play the walk
+                </button>
+              )}
+
               {!onCode && (
                 <div className="absolute right-3 top-12 rounded-[8px] bg-black/55 px-2.5 py-1.5 text-right text-white">
                   <p className="font-mono tnum text-[18px] font-medium leading-none">{f.found}</p>
@@ -151,16 +158,15 @@ export function WalkReplay() {
                 <div className="animate-rise absolute inset-x-3 bottom-3 rounded-[14px] border border-line bg-surface p-3.5 text-text">
                   <div className="flex items-center justify-between">
                     <p className="text-[11px] text-muted">{data.milestone}</p>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-ok-soft px-2 py-0.5 text-[11px] font-medium text-ok">
-                      <Check size={11} strokeWidth={2.5} /> Verified
-                    </span>
+                    {data.verdict.status === "verified" && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-ok-soft px-2 py-0.5 text-[11px] font-medium text-ok">
+                        <Check size={11} strokeWidth={2.5} /> Verified
+                      </span>
+                    )}
                   </div>
-                  <p className="font-mono tnum mt-1.5 text-[26px] font-medium leading-none">
-                    {data.confirmed}
-                    <span className="text-[15px] text-muted"> / {data.target}</span>
-                  </p>
+                  <p className="font-mono tnum mt-1.5 text-[26px] font-medium leading-none">{data.confirmed}</p>
                   <p className="mt-1 text-[11px] text-muted">
-                    blocks confirmed &middot; {data.review} to check &middot; code {data.codeRead} read
+                    blocks confirmed (target {data.target}) &middot; {data.review} to check &middot; code {data.codeRead} read
                   </p>
                   <a href={`/r/${data.visitId}`} className="mt-2.5 inline-flex items-center gap-1 text-[12px] font-medium text-accent">
                     Open this report <ArrowUpRight size={13} strokeWidth={2} />
@@ -173,7 +179,7 @@ export function WalkReplay() {
       </div>
       {data && (
         <p className="mt-3 text-center text-[12px] leading-snug text-muted">
-          Replay of a real walk in Kuje,{" "}
+          Replay of a real walk in {data.site},{" "}
           {new Date(data.recordedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}: {data.keyframes} stills,
           every 2nd shown. Boxes are SAM 3.1&rsquo;s output for each frame.
         </p>
