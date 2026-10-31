@@ -44,7 +44,7 @@ export function NewSiteForm() {
           <input name={f.name} required maxLength={60} defaultValue={f.initial} placeholder={f.placeholder} className={input} />
         </Field>
       ))}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-3">
         <Field label="Blocks in the wall" hint="Count rows × blocks per row">
           <input name="target" required type="number" inputMode="numeric" min={1} max={20000} defaultValue={100} className={`${input} font-mono tnum`} />
         </Field>
@@ -68,16 +68,14 @@ export function NewSiteForm() {
 }
 
 const input =
-  "h-11 w-full rounded-[6px] border border-line bg-surface px-3 text-[15px] outline-none transition-colors placeholder:text-muted/60 focus:border-accent";
+  "h-11 w-full min-w-0 rounded-[6px] border border-line bg-surface px-3 text-[15px] outline-none transition-colors placeholder:text-muted/60 focus:border-accent";
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
-    <label className="block">
-      <span className="flex items-baseline justify-between text-[13px] font-medium">
-        {label}
-        {hint && <span className="text-[12px] font-normal text-muted">{hint}</span>}
-      </span>
+    <label className="block min-w-0">
+      <span className="block text-[13px] font-medium">{label}</span>
       <span className="mt-1.5 block">{children}</span>
+      {hint && <span className="mt-1 block text-[12px] text-muted">{hint}</span>}
     </label>
   );
 }
