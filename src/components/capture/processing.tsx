@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Card, Eyebrow, naira } from "@/components/ui";
 import type { Fix } from "@/lib/client/location";
 import type { Uploader } from "@/lib/client/uploader";
+import { headlineText } from "@/lib/pipeline/verdict";
 import type { VisitResult } from "@/lib/pipeline/visit";
 
 type Phase = "counting" | "finishing" | "done" | "failed";
@@ -188,7 +189,7 @@ export function Receipt({ result }: { result: VisitResult }) {
         <div className="flex items-start justify-between gap-3 border-b border-dashed border-line p-4">
           <div>
             <p className="text-[13px] text-muted">{r.meta.milestoneTitle}</p>
-            <p className="font-display mt-1 text-[19px] font-semibold leading-snug">{r.verdict.headline}</p>
+            <p className="font-display mt-1 text-[19px] font-semibold leading-snug">{headlineText(r.verdict)}</p>
           </div>
           <span className={`shrink-0 rounded-full px-2.5 py-1 text-[12px] font-medium ${tone.chip}`}>{tone.label}</span>
         </div>

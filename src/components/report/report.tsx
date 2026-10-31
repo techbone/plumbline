@@ -4,6 +4,7 @@ import { Check, History, Link2, NotebookPen, ScanLine, TriangleAlert, X } from "
 import { useMemo, useState } from "react";
 import { Logo } from "@/components/logo";
 import { Card, Eyebrow, naira } from "@/components/ui";
+import { headlineText } from "@/lib/pipeline/verdict";
 import type { VisitResult } from "@/lib/pipeline/visit";
 
 const TONE = {
@@ -60,7 +61,7 @@ export function Report({ result: r }: { result: VisitResult }) {
               <tone.Icon size={14} strokeWidth={2.25} />
               {tone.label}
             </span>
-            <span className="text-[15px] text-muted">{r.verdict.headline}</span>
+            <span className="text-[15px] text-muted">{headlineText(r.verdict)}</span>
           </p>
 
           <Card className="mt-6 p-5">

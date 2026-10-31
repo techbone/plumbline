@@ -30,7 +30,7 @@ function decideCount(code: CodeCheck, confirmed: number, review: number, target?
   if (confirmed >= target) {
     return {
       status: code.status === "passed" ? "verified" : "review",
-      headline: `${confirmed} of ${target} blocks confirmed`,
+      headline: `${confirmed} blocks confirmed, target ${target}`,
       reasons,
     };
   }
@@ -40,4 +40,9 @@ function decideCount(code: CodeCheck, confirmed: number, review: number, target?
   }
   reasons.push(`${target - confirmed - review} blocks short of the milestone`);
   return { status: "short", headline: `Short: ${confirmed} of ${target} blocks`, reasons };
+}
+
+/** Reports written before the target wording changed said "372 of 100 blocks confirmed". */
+export function headlineText(v: Pick<Verdict, "headline">): string {
+  return v.headline.replace(/^(\d+) of (\d+) blocks confirmed$/, "$1 blocks confirmed, target $2");
 }
