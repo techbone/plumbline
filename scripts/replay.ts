@@ -3,7 +3,7 @@
  * them with SAM (cached under ./data), and stitch. Used to test stitching
  * changes against a real walk without walking it again.
  *
- *   npm run replay -- vis_62077ef1a92a 88 [baseUrl=https://plumbline-ruby.vercel.app]
+ *   npm run replay -- vis_55dbb8c2d7d2 107 [baseUrl=https://plumbline-ruby.vercel.app]
  */
 import { stitchWalk, withRetry } from "../src/lib/pipeline/count";
 import { countFrame } from "../src/lib/pipeline/visit";

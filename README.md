@@ -23,7 +23,7 @@ TODO: 3-minute video, recorded on the live app. Nothing sped up unless the video
 3. Write the 4-character code on paper, film it for two seconds, then walk slowly along the wall for 20–40 s.
 4. The report is ready about a minute after you stop. Open any frame, count the numbered blocks yourself.
 
-**Or read the reports from our walks:** [236 confirmed, verified](https://plumbline-ruby.vercel.app/r/vis_77d1c43227e3) · [a Q read as P, held](https://plumbline-ruby.vercel.app/r/vis_60c648d2e671) · [the demo site's history](https://plumbline-ruby.vercel.app/p/demo)
+**Or read the reports from our walks:** [372 confirmed on a 53 s fence walk](https://plumbline-ruby.vercel.app/r/vis_55dbb8c2d7d2) · [236 confirmed, verified](https://plumbline-ruby.vercel.app/r/vis_77d1c43227e3) · [the demo site's history](https://plumbline-ruby.vercel.app/p/demo)
 
 **From the repo:**
 
@@ -42,9 +42,11 @@ npm run e2e -- fixtures/your-walk.mp4 http://localhost:3100
 
 | Measured | Value | Where |
 |---|---|---|
+| Blocks confirmed on a 53 s phone walk, GPS ±2 m | 372 (+45 seen once), code read, verified | [vis_55dbb8c2d7d2](https://plumbline-ruby.vercel.app/r/vis_55dbb8c2d7d2) |
 | Blocks confirmed on a 58 s phone walk | 236 (+21 seen once), code read, verified | [vis_77d1c43227e3](https://plumbline-ruby.vercel.app/r/vis_77d1c43227e3) |
-| Double counts removed by the close-up filter, replayed on a real walk | 12 (245 → 239 confirmed) | `npm run replay -- vis_62077ef1a92a 88`, [build log](docs/build-log.md) |
+| Double counts removed by the close-up filter, replayed on a real walk | 12 (245 → 239 confirmed) | [build log](docs/build-log.md) (that report was lost in the storage move) |
 | Test clip: stills sent vs the same video | 9.3 MB vs 29 MB (540p) vs 94 MB (as recorded) | [docs/evidence/e2e](docs/evidence/e2e) |
+| JPEG quality 0.82 → 0.75 on the 53 s walk | 33.1 → 17.7 MB, 372 → 367 confirmed | [build log](docs/build-log.md) |
 | End to end through the HTTP API, 63 stills | 114–133 s, 225 confirmed + 16 seen once | `npm run e2e` |
 
 ## Contents

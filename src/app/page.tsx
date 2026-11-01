@@ -37,8 +37,8 @@ const STEPS = [
 const WALKS = [
   { id: "vis_55dbb8c2d7d2", what: "Fence, Karsana, 53 s walk", frames: 107, mb: 33.1, confirmed: 372, review: 45, code: "XKMX read", verdict: "Verified", tone: "ok" },
   { id: "vis_77d1c43227e3", what: "Boundary wall, 58 s walk", frames: 117, mb: 31.5, confirmed: 236, review: 21, code: "VRKE read", verdict: "Verified", tone: "ok" },
-  { id: "vis_62077ef1a92a", what: "Boundary wall, 44 s walk", frames: 88, mb: 24.4, confirmed: 245, review: 35, code: "74RV read", verdict: "Verified", tone: "ok" },
-  { id: "vis_60c648d2e671", what: "Boundary wall, 34 s walk", frames: 68, mb: 16.9, confirmed: 141, review: 13, code: "G3QH read as G3PH", verdict: "Short", tone: "bad" },
+  { id: "vis_62077ef1a92a", what: "Boundary wall, 44 s walk", frames: 88, mb: 24.4, confirmed: 245, review: 35, code: "74RV read", verdict: "Verified", tone: "ok", lost: true },
+  { id: "vis_60c648d2e671", what: "Boundary wall, 34 s walk", frames: 68, mb: 16.9, confirmed: 141, review: 13, code: "G3QH read as G3PH", verdict: "Short", tone: "bad", lost: true },
 ] as const;
 
 export default function Home() {
@@ -139,9 +139,13 @@ export default function Home() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <a href={`/r/${w.id}`} className="inline-flex items-center gap-1 text-[13px] font-medium">
-                      Report <ArrowUpRight size={14} strokeWidth={1.75} />
-                    </a>
+                    {"lost" in w ? (
+                      <span className="text-[12px] text-muted">Report lost</span>
+                    ) : (
+                      <a href={`/r/${w.id}`} className="inline-flex items-center gap-1 text-[13px] font-medium">
+                        Report <ArrowUpRight size={14} strokeWidth={1.75} />
+                      </a>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -150,7 +154,7 @@ export default function Home() {
         </div>
         <p className="mt-3 max-w-[80ch] text-[13px] leading-relaxed text-muted">
           The short walk failed for two reasons: a hand-written Q read as P (the code check did its job), and the walk covered less of the
-          wall. Reports are saved once and never edited, so earlier ones keep the numbers they were issued with.
+          wall. Reports are saved once and never edited, so earlier ones keep the numbers they were issued with. Two reports were lost on Nov 1 when our first storage host paused the store at its free-tier cap; the rows above show the numbers those reports had.
         </p>
       </section>
 
