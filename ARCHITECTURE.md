@@ -32,7 +32,7 @@ Our own deterministic code (`src/lib/verify/`, unit-tested): frame-to-frame shif
 flowchart LR
   F[Foreman phone<br/>still every 0.5 s + GPS] -->|JPEG frames, signed ticket| API[Next.js route handlers on Vercel]
   O[Owner<br/>/p/site · /r/visit] --> API
-  API --> BLOB[(Vercel Blob<br/>write-once objects)]
+  API --> BLOB[(Cloudflare R2<br/>write-once objects)]
   API --> SAM[SAM 3.1<br/>image mode, per frame]
   API --> SPARK[Muse Spark 1.3<br/>code, same site, notes]
 ```
@@ -80,7 +80,7 @@ The phone never uploads a video. It grabs a still every half second (shortest si
 
 ## Data model
 
-No database. The demo site is code (`src/lib/projects.ts`); everything else is one write-once object in Vercel Blob (a local folder in dev):
+No database. The demo site is code (`src/lib/projects.ts`); everything else is one write-once object in Cloudflare R2 (a local folder in dev):
 
 - `projects/<id>/project.json`: a test site made on `/new`
 - `projects/<id>/pin.json`: the site pin, set by the first visit with a precise GPS fix and a readable code
@@ -112,7 +112,7 @@ Site notes never change the verdict.
 
 - **Next.js + TypeScript on Vercel's free plan:** one deploy for capture, reports and API.
 - **Stills, not video, from the phone:** a 30–90 MB video can't pass through a function (about 4.5 MB request limit) and costs data. Stills let counting run live.
-- **Vercel Blob, no database:** the only state is write-once objects; the signed ticket replaces a visit table.
+- **Cloudflare R2, no database:** the only state is write-once objects; the signed ticket replaces a visit table.
 - **Pure-JS JPEG decode (`jpeg-js`), no ffmpeg on the server:** stitching needs only small grey copies. `ffmpeg-static` is a dev dependency for scripts.
 - **SAM image mode for every count:** video tracking caps at 16 objects per frame and took 4–30 minutes per prompt on a 31 s clip (see `docs/build-log.md`).
 

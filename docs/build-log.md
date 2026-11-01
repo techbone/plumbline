@@ -73,3 +73,8 @@ Dead ends, surprises from the Meta API, the path chosen, and the test that guard
 - **Code alphabet:** Q dropped after it was read as P on a real walk.
 - **SAM isn't perfectly repeatable:** re-running SAM on the 117 stills of `vis_77d1c43227e3` gave 235 confirmed / 22 seen once against production's 236 / 21 (same 257 blocks in total). On the 88 stills of `vis_62077ef1a92a` a re-run matched production exactly. Reports store their own numbers and are never recomputed.
 - **Home page replay:** `npm run showcase` turns a stored visit into 59 small stills (1.26 MB) with SAM's boxes and the running count; the receipt quotes the production report.
+
+## Vercel Blob hit its free cap, storage moved to Cloudflare R2 (Nov 1)
+
+- **Surprise:** Vercel Blob's free tier allows 2,000 "advanced operations" a month, and `list()` counts as one just like a write. Our read path called `list()` before every fetch, so one walk cost about 500 operations (a write for each still and each count, plus a list for each read when the report is built). A few walks and a day of page views used the cap, and the store was paused for 30 days. Every report and the owner pages returned 404.
+- **Decision:** moved the write-once store to Cloudflare R2 (S3 API; 10 GB free, no egress fees, 1M writes and 10M reads a month). Reads now go straight to the key with no list; only the site history lists. `src/lib/storage.ts` is still the single file that knows about the store, and the write-once rule is enforced by the store with `If-None-Match: *`.

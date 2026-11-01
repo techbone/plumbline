@@ -75,7 +75,7 @@ Take SAM 3.1 out and there is no count, only a guess. Take Muse Spark out and no
 flowchart LR
   F[Foreman phone<br/>still every 0.5 s + GPS] -->|JPEG frames, signed ticket| API[Next.js route handlers on Vercel]
   O[Owner<br/>/p/site · /r/visit] --> API
-  API --> BLOB[(Vercel Blob<br/>write-once objects)]
+  API --> BLOB[(Cloudflare R2<br/>write-once objects)]
   API --> SAM[SAM 3.1<br/>image mode, per frame]
   API --> SPARK[Muse Spark 1.3<br/>code, same site, notes]
 ```
@@ -173,7 +173,7 @@ Prerequisites: Node 20+, a Meta Model API key.
 |---|---|---|
 | `MODEL_API_KEY` | yes | Meta Model API key |
 | `VISIT_SECRET` | in production | Signs visit tickets (`openssl rand -base64 32`) |
-| `BLOB_READ_WRITE_TOKEN` | in production | Vercel Blob store; without it, objects go to `./data` |
+| `R2_BUCKET`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` | in production | Cloudflare R2 bucket (S3 API); without `R2_BUCKET`, objects go to `./data` |
 | `DATA_DIR` | no | Local storage folder, default `./data` |
 
 ```sh
