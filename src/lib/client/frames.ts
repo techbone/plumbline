@@ -1,13 +1,14 @@
 /**
  * Keyframes are made on the phone, not the server: a still every half second,
- * shortest side 540 px, JPEG. A 30 s walk becomes ~60 frames and ~9 MB instead
- * of a 30–90 MB video upload.
+ * shortest side 540 px, JPEG. A 53 s walk on rough concrete becomes 107 frames
+ * and ~17 MB instead of a 30–90 MB video upload. Quality 0.75 halves the data
+ * against 0.82 and cost about 1% of the count on a real walk (docs/build-log.md).
  */
 
 export const FRAME_FPS = 2;
 export const FRAME_SHORT_SIDE = 540;
 export const MAX_FRAMES = 240;
-const QUALITY = 0.82;
+const QUALITY = 0.75;
 
 export type Frame = { blob: Blob; t: number; url: string };
 

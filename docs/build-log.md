@@ -78,3 +78,18 @@ Dead ends, surprises from the Meta API, the path chosen, and the test that guard
 
 - **Surprise:** Vercel Blob's free tier allows 2,000 "advanced operations" a month, and `list()` counts as one just like a write. Our read path called `list()` before every fetch, so one walk cost about 500 operations (a write for each still and each count, plus a list for each read when the report is built). A few walks and a day of page views used the cap, and the store was paused for 30 days. Every report and the owner pages returned 404.
 - **Decision:** moved the write-once store to Cloudflare R2 (S3 API; 10 GB free, no egress fees, 1M writes and 10M reads a month). Reads now go straight to the key with no list; only the site history lists. `src/lib/storage.ts` is still the single file that knows about the store, and the write-once rule is enforced by the store with `If-None-Match: *`.
+
+## Smaller stills: JPEG quality 0.82 → 0.75 (Nov 1)
+
+- **Why:** at 0.82, real walks on rough concrete were 270–310 KB a still (33.1 MB for the 53 s Karsana walk). That's expensive mobile data for the foreman and fills storage fast.
+- **Measured:** re-encoded the Karsana walk's 107 stills with Chrome's canvas encoder and re-counted every one with SAM 3.1:
+
+  | Quality | Walk size | Confirmed | To check | SAM boxes, all frames |
+  |---|---|---|---|---|
+  | 0.82 (production run) | 33.1 MB | 372 | 45 | 5,004 |
+  | 0.75 | 17.7 MB | 367 | 45 | 4,573 |
+  | 0.70 | 16.3 MB | 360 | 51 | 4,618 |
+  | 0.65 / 0.60 | 14.7 / 13.3 MB | not counted | | |
+
+- **Decision:** 0.75. It halves the data and moves the confirmed count by about 1%. These stills were compressed twice (phone at 0.82, then again), which is harsher than a single encode on the phone, so this is the worst case.
+- **Also restored after the storage move:** the Karsana (`vis_55dbb8c2d7d2`) and `vis_77d1c43227e3` reports, byte for byte from copies saved before the Blob pause. The Karsana site pin's coordinates weren't in the report, so that site is unpinned until its next located visit. The `vis_62077ef1a92a` and `vis_60c648d2e671` reports were only in Blob and are gone.
