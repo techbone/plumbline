@@ -134,3 +134,10 @@ Dead ends, surprises from the Meta API, the path chosen, and the test that guard
 - **Read:** the stitched count overshoots on this wall by about 9%, consistent with the overlap analysis above. It's one wall and one counter who also built the tool, so it's evidence of the size of the error, not a benchmark. The 31 s test clip's 225 and the other stored walks have no hand counts.
 - **Decision:** the product keeps reporting its stitched count. Merging overlapping boxes would land within 5% here, but we tested a related change on four stored walks and it moved one of them the wrong way; with a single hand-counted wall we can't tell which direction generalises. Left as a limitation in the README.
 
+## 2026-11-01 — Correction: the hand count is 370, and the stitched count was right
+
+- **What changed:** the builder recounted the Karsana wall and got 370, not the 340 recorded in the entry above. The first pass had missed about 30 blocks, which also tells us how much a careful hand count of a wall this size varies (about 8% between two passes).
+- **Result against 370:** the report's stitched count of 372 is +0.5%; merging likely duplicates gives 357 (-3.5%) or 334 seen in 2+ stills (-9.7%); the geometry estimate, about 330 (300 to 360), is 10.8% under and its range misses the count.
+- **What this retracts:** the two entries above concluded that the stitched count "runs about 10% high". That was based on the overlap analysis and on a hand count of 340, and it was wrong: the overlaps are real (about 40 pairs), but SAM's misses on dirty and shaded blocks offset them on this wall. Both estimation methods undercount. Merging overlapping boxes, which we considered, would have made the count worse here, and so would any correction pointed the way our analysis suggested; not shipping it was right, though for a different reason than the one we wrote down.
+- **Not established:** that the counter is accurate in general. It's one wall; offsetting errors can cancel by luck. The other stored walks have no hand counts, and the README says so.
+

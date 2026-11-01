@@ -133,4 +133,4 @@ Site notes never change the verdict.
 | M3 | Oct 30 | First phone walks on the live app; close-up filter; iOS camera fixes. |
 | M4 | Oct 30 | GPS site pin, Muse Spark same-site check and site notes, test sites, owner timeline, home page replay. |
 | M5 | Oct 31–Nov 1 | Karsana walk (372 blocks, GPS pin); storage moved to Cloudflare R2 after the Blob free cap; stills at quality 0.75; replay attack tested on the live app (not verified); demo video. |
-| M6 | Nov 1–4 | Hand count of the Karsana wall (340 blocks) against the report's 372, recorded in the README; submit by Nov 4 12:00 ET. |
+| M6 | Nov 1–4 | Hand count of the Karsana wall (370 blocks) against the report's 372, recorded in the README; submit by Nov 4 12:00 ET. |
