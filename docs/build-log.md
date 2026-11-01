@@ -128,3 +128,9 @@ Dead ends, surprises from the Meta API, the path chosen, and the test that guard
 - **Reading:** about 330, within 300 to 360, so the stitched 372 is about 10% high. That's the same direction the overlap count pointed, and it's small against a target of 100, so the verdict doesn't change. The product still reports 372 and says "confirmed", because that's what its rule produces; changing the counter on an estimate, days before judging, would be a guess dressed up as a fix.
 - **Next:** a hand count of this wall replaces both methods with a measurement.
 
+## 2026-11-01 — Hand count of the Karsana wall: 340
+
+- **Result:** the builder hand-counted the wall on site: 340 blocks. The report's stitched and confirmed count is 372 (+9.4%); merging likely duplicates gives 357 (+5.0%) or 334 seen in 2+ stills (-1.8%); the geometry estimate made beforehand, about 330 (300 to 360), was 2.9% under and its range contained the true count.
+- **Read:** the stitched count overshoots on this wall by about 9%, consistent with the overlap analysis above. It's one wall and one counter who also built the tool, so it's evidence of the size of the error, not a benchmark. The 31 s test clip's 225 and the other stored walks have no hand counts.
+- **Decision:** the product keeps reporting its stitched count. Merging overlapping boxes would land within 5% here, but we tested a related change on four stored walks and it moved one of them the wrong way; with a single hand-counted wall we can't tell which direction generalises. Left as a limitation in the README.
+

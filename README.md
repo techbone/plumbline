@@ -44,7 +44,7 @@ npm run e2e -- fixtures/your-walk.mp4 http://localhost:3100
 
 | Measured | Value | Where |
 |---|---|---|
-| Blocks on a 53 s phone walk, GPS ±2 m | 372 stitched and confirmed (+45 seen once); our estimate of the actual wall is about 330 (300–360), see [How close is the count?](#how-close-is-the-count); code read, verified | [vis_55dbb8c2d7d2](https://plumbline-ruby.vercel.app/r/vis_55dbb8c2d7d2) |
+| Blocks on a 53 s phone walk, GPS ±2 m | 372 stitched and confirmed (+45 seen once); hand count of the wall 340 (+9%), see [How close is the count?](#how-close-is-the-count); code read, verified | [vis_55dbb8c2d7d2](https://plumbline-ruby.vercel.app/r/vis_55dbb8c2d7d2) |
 | Blocks confirmed on a 58 s phone walk | 236 (+21 seen once), code read, verified | [vis_77d1c43227e3](https://plumbline-ruby.vercel.app/r/vis_77d1c43227e3) |
 | Double counts removed by the close-up filter, replayed on a real walk | 12 (245 → 239 confirmed) | [build log](docs/build-log.md) (that report was lost in the storage move) |
 | Test clip: stills sent vs the same video | 9.3 MB vs 29 MB (540p) vs 94 MB (as recorded) | [docs/evidence/e2e](docs/evidence/e2e) |
@@ -134,15 +134,15 @@ Guarded by `src/lib/verify/stitch.test.ts` (shift recovery, edge-box skip, same-
 
 ## How close is the count?
 
-We haven't hand-counted the Karsana wall, so there is no ground truth to quote. What we can say, from the stored data of that one walk (`vis_55dbb8c2d7d2`):
+The builder hand-counted the Karsana wall on site: **340 blocks**. This is one wall, counted by one person who also built the tool, so treat it as a single data point, not a benchmark. Against it, for the walk in report `vis_55dbb8c2d7d2`:
 
-| Estimate | How | Blocks |
-|---|---|---|
-| Stitched and confirmed | Every block SAM found, placed on one wall, each seen in 2+ stills (what the report shows) | 372 (+45 seen once) |
-| Duplicates merged | Boxes that overlap another by more than 30%, or sit mostly inside one, treated as the same block | 357 (334 seen in 2+ stills) |
-| Wall geometry | The stitched wall is about 47 blocks long (3,420 px at 69 px per block with joint) and 5 to 9 courses high, typically 6 to 7 | 305 to 330 |
+| Count | How | Blocks | Against 340 |
+|---|---|---|---|
+| Stitched and confirmed | What the report shows: every block SAM found, placed on one wall, each seen in 2+ stills | 372 (+45 seen once) | +9% |
+| Duplicates merged | Boxes that overlap another by more than 30%, or sit mostly inside one, treated as the same block | 357 (334 seen in 2+ stills) | +5% (334: -2%) |
+| Our estimate, made before the hand count | Wall geometry: about 47 blocks long, 6 to 7 courses high | about 330 (300 to 360) | -3%, hand count inside the range |
 
-Our fair reading is **about 330 blocks, within 300 to 360**: the stitched count runs about 10% high, mostly in the middle stretch, where the foreman stood further back and grass filled the lower half of each still, so about 40 pairs of boxes overlap. SAM also skips some dirty blocks (about 6% on our test stills), which pulls the other way. The verdict doesn't turn on it: the milestone target was 100, and every estimate is more than three times that. A hand count of this wall would replace the estimate with a measurement. Method and the fix we tested and held back: [build log](docs/build-log.md).
+So the report's 372 runs about 9% high on this wall, where the foreman stood further back mid-walk and grass filled the lower half of each still, so about 40 pairs of boxes overlap. SAM also skips some dirty blocks (about 6% on our test stills), which pulls the other way. The release verdict doesn't turn on it: the milestone target was 100 and every count is more than three times that. We have not changed the product to correct for the overlap; the fix we tested moved another walk's count the wrong way and is recorded, with the method, in the [build log](docs/build-log.md).
 
 ## What's real vs simplified
 
@@ -207,7 +207,7 @@ Open `http://localhost:3000/new`, create a site, open its foreman link on a phon
 
 - Counts blocks in walls you walk along. Columns, openings, roofs and anything the camera can't see aren't counted.
 - Stitching assumes you walk parallel to the wall. Turning a corner or walking at a steep angle can double count or miss; the close-up filter catches only the step back from the code.
-- Counts are SAM's, checkable frame by frame on each report, not hand counts. On the Karsana walk we estimate the stitched count runs about 10% high (next section); we have not corrected the product for it.
+- Counts are SAM's, checkable frame by frame on each report. On the one wall we hand-counted (340), the stitched count of 372 ran 9% high; we have not corrected the product for it, and have no second wall to say whether that's typical.
 - GPS can be spoofed; the visit code and same-site check carry more of the weight.
 - Test sites and reports are public to anyone with the link.
 
