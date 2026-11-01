@@ -44,7 +44,7 @@ npm run e2e -- fixtures/your-walk.mp4 http://localhost:3100
 
 | Measured | Value | Where |
 |---|---|---|
-| Blocks confirmed on a 53 s phone walk, GPS ±2 m | 372 (+45 seen once), code read, verified | [vis_55dbb8c2d7d2](https://plumbline-ruby.vercel.app/r/vis_55dbb8c2d7d2) |
+| Blocks on a 53 s phone walk, GPS ±2 m | 372 stitched and confirmed (+45 seen once); our estimate of the actual wall is about 330 (300–360), see [How close is the count?](#how-close-is-the-count); code read, verified | [vis_55dbb8c2d7d2](https://plumbline-ruby.vercel.app/r/vis_55dbb8c2d7d2) |
 | Blocks confirmed on a 58 s phone walk | 236 (+21 seen once), code read, verified | [vis_77d1c43227e3](https://plumbline-ruby.vercel.app/r/vis_77d1c43227e3) |
 | Double counts removed by the close-up filter, replayed on a real walk | 12 (245 → 239 confirmed) | [build log](docs/build-log.md) (that report was lost in the storage move) |
 | Test clip: stills sent vs the same video | 9.3 MB vs 29 MB (540p) vs 94 MB (as recorded) | [docs/evidence/e2e](docs/evidence/e2e) |
@@ -54,7 +54,7 @@ npm run e2e -- fixtures/your-walk.mp4 http://localhost:3100
 
 ## Contents
 
-[The problem](#the-problem) · [What it does](#what-it-does) · [Architecture](#architecture) · [The hard problem](#the-hard-problem-the-wall-that-counted-itself-twice) · [Real vs simplified](#whats-real-vs-simplified) · [Decisions](#engineering-decisions) · [Layout](#project-layout) · [Run it locally](#run-it-locally) · [Limitations](#known-limitations-and-disclosure)
+[The problem](#the-problem) · [What it does](#what-it-does) · [Architecture](#architecture) · [The hard problem](#the-hard-problem-the-wall-that-counted-itself-twice) · [How close is the count?](#how-close-is-the-count) · [Real vs simplified](#whats-real-vs-simplified) · [Decisions](#engineering-decisions) · [Layout](#project-layout) · [Run it locally](#run-it-locally) · [Limitations](#known-limitations-and-disclosure)
 
 ## The problem
 
@@ -132,6 +132,18 @@ Then the first real walk taught us something the test clip didn't. Foremen film 
 
 Guarded by `src/lib/verify/stitch.test.ts` (shift recovery, edge-box skip, same-still boxes never merge, close-ups dropped) and `npm run replay`.
 
+## How close is the count?
+
+We haven't hand-counted the Karsana wall, so there is no ground truth to quote. What we can say, from the stored data of that one walk (`vis_55dbb8c2d7d2`):
+
+| Estimate | How | Blocks |
+|---|---|---|
+| Stitched and confirmed | Every block SAM found, placed on one wall, each seen in 2+ stills (what the report shows) | 372 (+45 seen once) |
+| Duplicates merged | Boxes that overlap another by more than 30%, or sit mostly inside one, treated as the same block | 357 (334 seen in 2+ stills) |
+| Wall geometry | The stitched wall is about 47 blocks long (3,420 px at 69 px per block with joint) and 5 to 9 courses high, typically 6 to 7 | 305 to 330 |
+
+Our fair reading is **about 330 blocks, within 300 to 360**: the stitched count runs about 10% high, mostly in the middle stretch, where the foreman stood further back and grass filled the lower half of each still, so about 40 pairs of boxes overlap. SAM also skips some dirty blocks (about 6% on our test stills), which pulls the other way. The verdict doesn't turn on it: the milestone target was 100, and every estimate is more than three times that. A hand count of this wall would replace the estimate with a measurement. Method and the fix we tested and held back: [build log](docs/build-log.md).
+
 ## What's real vs simplified
 
 | Capability | How it's backed | Status |
@@ -167,6 +179,7 @@ src/lib/meta/       Meta API client, SAM image and video calls
 src/lib/verify/     pure, tested logic: stitching, GPS, area cross-check
 src/lib/pipeline/   per-still counting, Muse Spark checks, release rule, finishing a visit
 src/lib/client/     in-browser frame capture, uploader, GPS watch
+public/showcase/    the home page's replay: 54 stills of one real walk plus SAM's boxes for each (built by `npm run showcase`, committed because the site serves it as-is)
 scripts/            spikes, e2e, replay of a stored visit, home page replay builder
 docs/               build log, evidence, demo script, submission text
 ```
@@ -194,8 +207,7 @@ Open `http://localhost:3000/new`, create a site, open its foreman link on a phon
 
 - Counts blocks in walls you walk along. Columns, openings, roofs and anything the camera can't see aren't counted.
 - Stitching assumes you walk parallel to the wall. Turning a corner or walking at a steep angle can double count or miss; the close-up filter catches only the step back from the code.
-- No hand-counted accuracy figure yet for a full phone walk; the counts above are SAM's, checkable frame by frame on each report.
-- On the 53 s Karsana walk, about 40 pairs of boxes overlap in the middle stretch, where the foreman stood further back and grass filled the lower half of each still. Some of those are likely double counts, so 372 may be high there. Measuring the slide on the wall band only cut the overlaps but moved another walk's count the other way; without a hand count we didn't ship it ([build log](docs/build-log.md)).
+- Counts are SAM's, checkable frame by frame on each report, not hand counts. On the Karsana walk we estimate the stitched count runs about 10% high (next section); we have not corrected the product for it.
 - GPS can be spoofed; the visit code and same-site check carry more of the weight.
 - Test sites and reports are public to anyone with the link.
 

@@ -119,3 +119,12 @@ Dead ends, surprises from the Meta API, the path chosen, and the test that guard
   | Test clip 31 s | 225 / 4 | 226 / 4 |
 
 - **Decision:** not shipped. Overlaps fell on two walks, but the 44 s walk's count rose by 19 with overlaps barely moving. Without a hand count of any of these walls we can't tell which version is closer to the truth, and changing the counter a few days before judging on a hunch would be worse than stating the limitation. It's in the README's limitations; a hand count of the Karsana wall decides it.
+
+## 2026-11-01 — A fair estimate of the Karsana wall without a hand count
+
+- **Why:** the report says 372 confirmed blocks for a wall nobody has hand-counted, and the overlapping boxes above suggest it runs high. Rather than leave "372" standing as the number, we estimated the real count from the stored walk (`vis_55dbb8c2d7d2`, 417 stitched blocks, 372 seen in 2+ stills).
+- **Method A, merge likely duplicates:** union every pair of stitched boxes whose overlap is more than 30% of their union, or more than 60% of the smaller box. 417 stitched blocks became 357; 334 of those were seen in 2+ stills.
+- **Method B, geometry:** median block 69 × 50 px on the stitched wall; wall extent 3,420 px, so about 47 blocks per row with a 6% joint allowance. Rows per slice of the wall (three blocks wide) ranged 4 to 9 where detection was dense (sparse slices undercount rows and were not trusted): median 7, mean 6.5. So 47 × 6.5 to 7 is about 305 to 330. Summing rows per slice naively gave 261, which we discarded because it undercounts wherever SAM misses a course.
+- **Reading:** about 330, within 300 to 360, so the stitched 372 is about 10% high. That's the same direction the overlap count pointed, and it's small against a target of 100, so the verdict doesn't change. The product still reports 372 and says "confirmed", because that's what its rule produces; changing the counter on an estimate, days before judging, would be a guess dressed up as a fix.
+- **Next:** a hand count of this wall replaces both methods with a measurement.
+
