@@ -93,3 +93,9 @@ Dead ends, surprises from the Meta API, the path chosen, and the test that guard
 
 - **Decision:** 0.75. It halves the data and moves the confirmed count by about 1%. These stills were compressed twice (phone at 0.82, then again), which is harsher than a single encode on the phone, so this is the worst case.
 - **Also restored after the storage move:** the Karsana (`vis_55dbb8c2d7d2`) and `vis_77d1c43227e3` reports, byte for byte from copies saved before the Blob pause. The Karsana site pin's coordinates weren't in the report, so that site is unpinned until its next located visit. The `vis_62077ef1a92a` and `vis_60c648d2e671` reports were only in Blob and are gone.
+
+## Replay attack on the live app (Nov 1)
+
+- **Test:** fed the stored Karsana walk (`vis_55dbb8c2d7d2`, paper code XKMX) to headless Chrome as its camera (`--use-file-for-fake-video-capture`) and walked it into a fresh visit on a new test site through the live foreman link.
+- **Result:** `vis_7ef2922f3dfd`, **not verified**. Muse Spark read "XKMX" on frame 0 and the visit expected "47TU". SAM still counted 353 confirmed blocks, which is the point: the count alone proves nothing about when it was filmed.
+- **Also seen:** from a desktop uplink, counting fell behind the walk (23 of 105 stills counted when the walk stopped, the rest during processing). On the phone walk over LTE it kept pace (107/107 at stop). Uploads, not SAM, are the bottleneck.

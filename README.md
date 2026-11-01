@@ -46,6 +46,7 @@ npm run e2e -- fixtures/your-walk.mp4 http://localhost:3100
 | Blocks confirmed on a 58 s phone walk | 236 (+21 seen once), code read, verified | [vis_77d1c43227e3](https://plumbline-ruby.vercel.app/r/vis_77d1c43227e3) |
 | Double counts removed by the close-up filter, replayed on a real walk | 12 (245 → 239 confirmed) | [build log](docs/build-log.md) (that report was lost in the storage move) |
 | Test clip: stills sent vs the same video | 9.3 MB vs 29 MB (540p) vs 94 MB (as recorded) | [docs/evidence/e2e](docs/evidence/e2e) |
+| Yesterday's walk fed into a new visit as the camera | Not verified: `Read "XKMX", expected "47TU"` (353 blocks still counted) | [vis_7ef2922f3dfd](https://plumbline-ruby.vercel.app/r/vis_7ef2922f3dfd) |
 | JPEG quality 0.82 → 0.75 on the 53 s walk | 33.1 → 17.7 MB, 372 → 367 confirmed | [build log](docs/build-log.md) |
 | End to end through the HTTP API, 63 stills | 114–133 s, 225 confirmed + 16 seen once | `npm run e2e` |
 
