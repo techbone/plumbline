@@ -99,3 +99,9 @@ Dead ends, surprises from the Meta API, the path chosen, and the test that guard
 - **Test:** fed the stored Karsana walk (`vis_55dbb8c2d7d2`, paper code XKMX) to headless Chrome as its camera (`--use-file-for-fake-video-capture`) and walked it into a fresh visit on a new test site through the live foreman link.
 - **Result:** `vis_7ef2922f3dfd`, **not verified**. Muse Spark read "XKMX" on frame 0 and the visit expected "47TU". SAM still counted 353 confirmed blocks, which is the point: the count alone proves nothing about when it was filmed.
 - **Also seen:** from a desktop uplink, counting fell behind the walk (23 of 105 stills counted when the walk stopped, the rest during processing). On the phone walk over LTE it kept pace (107/107 at stop). Uploads, not SAM, are the bottleneck.
+
+## Muse Voice Transcribe is listed but not served; Spark 1.2 transcribes instead (Nov 1)
+
+- **Surprise:** `GET /v1/models` lists `muse-voice-transcribe-1.0`, but `POST /v1/audio/transcriptions` returns 404 with no body, and `/v1/responses` and `/v1/chat/completions` with that model say "The requested model was not found".
+- **Path chosen:** `muse-spark-1.2` on `/v1/responses` with an `input_audio` part (base64 WAV) transcribes well. We used it to check the demo voiceover: split the take at its pauses, transcribed each of the 19 lines, matched them to the script, then cut each line back out of the finished video at its planned time and transcribed it again to prove placement.
+- **Quirks:** on one clip Spark 1.2 replied that it couldn't access audio at all, and on another it declined a verbatim transcript because the audio named a place. Both passed on retry or by checking the level instead. Mishearings are phonetic ("Psalm 3.1" for SAM 3.1, "Kalsana" for Karsana).

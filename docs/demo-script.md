@@ -1,6 +1,8 @@
-# Demo video: voiceover script (2:51)
+# Demo video: voiceover script (2:56)
 
-The video is already cut; read this over it. Calm pace, about 130 words a minute. Each block starts at its timecode. If you finish a line early, pause; the picture holds. Bracketed timecodes inside a block mark where the picture changes, so land the sentence after it on that change.
+The voiced cut is `out/plumbline-demo-voiced.mp4`: the scenes were re-timed to this recording, so every picture change lands on the line that names it. Timecodes below are that cut's.
+
+The silent cut was read over at these lines: Calm pace, about 130 words a minute. Each block starts at its timecode. If you finish a line early, pause; the picture holds. Bracketed timecodes inside a block mark where the picture changes, so land the sentence after it on that change.
 
 Everything on screen is real and labelled in the corner. Scenes are either the live app, the live report, screenshots from the phone on 31 Oct, or a replay of that stored walk.
 
@@ -14,11 +16,11 @@ Everything on screen is real and labelled in the corner. Scenes are either the l
 
 > Nigerians abroad build homes back home in stages, paying a relative or a foreman they can't watch.
 
-**[0:22] · "A photo on WhatsApp."**
+**[0:23] · "A photo on WhatsApp."**
 
 > The proof is usually a photo on WhatsApp. And people have been sent photos of someone else's house, for years.
 
-**[0:30] · "A photo can't show how much was built, when, or where."**
+**[0:32] · "A photo can't show how much was built, when, or where."**
 
 > A photo can't show how much was built, when, or where.
 
@@ -26,47 +28,47 @@ Everything on screen is real and labelled in the corner. Scenes are either the l
 
 > Plumbline turns the foreman's phone walk into a receipt the owner can check before the next payment. Nothing to install.
 
-**0:50 · Setting up a site, then the site page with the QR**
+**0:49 · Setting up a site, then the site page with the QR**
 
 > The owner sets the milestone: this wall, this many blocks, this payment. They get a link and a QR code to send to the foreman.
 
-**1:03 · The walk, step 1 on the left**
+**1:01 · The walk, step 1 on the left**
 
 > On site, the foreman gets a one-time code, writes it on paper, and films it for two seconds.
 
-**[1:12] · step 2**
+**[1:09] · step 2**
 
 > Then they walk slowly along the wall. The phone never uploads a video. It sends a still every half second, because data is expensive.
 
-**[1:21] · step 3**
+**[1:20] · step 3**
 
 > As each still arrives, SAM 3.1 finds the blocks in it, so the count climbs while they walk.
 
-**1:31 · Phone screen: "Stitching the wall"**
+**1:30 · Phone screen: "Stitching the wall"**
 
 > When the walk stops, the stills are joined into one wall, so each block counts once. Muse Spark reads the code without being told what it should be, and GPS pins the site.
 
-**[1:39] · Phone screen: "Sent to the owner"**
+**[1:45] · Phone screen: "Sent to the owner"**
 
 > About a minute later, the report is sent.
 
-**1:50 · The report on a laptop, top of the page**
+**1:49 · The report on a laptop, top of the page**
 
 > The owner sees the verdict first, and every check behind it.
 
-**[1:55] · scrolls down to the site notes**
+**[1:54] · scrolls down to the site notes**
 
 > Muse Spark adds site notes that point to exact frames.
 
-**[2:03] · back up, panning along the wall**
+**[1:59] · back up, panning along the wall**
 
 > And here's the stitched wall. Solid blocks were seen in two or more stills. Amber ones only once, so a person should look.
 
-**2:13 · "What if the video is old?"**
+**2:10 · "What if the video is old?"**
 
 > So what stops someone sending yesterday's video?
 
-**[2:16] · the old walk playing as the camera**
+**[2:15] · the old walk playing as the camera**
 
 > We fed that same recorded walk into a brand-new visit, as if it were the camera.
 
@@ -74,11 +76,11 @@ Everything on screen is real and labelled in the corner. Scenes are either the l
 
 > The blocks still get counted. But this visit's code is four, seven, T, U, and the paper says X, K, M, X.
 
-**[2:29] · "Not verified"**
+**[2:36] · "Not verified"**
 
 > Muse Spark caught it. Not verified, no matter what the count says.
 
-**2:39 · Closing card**
+**2:43 · Closing card**
 
 > Plumbline is built on SAM 3.1 and Muse Spark, and works with any phone, on any block wall. The contractor's video becomes the receipt.
 
@@ -96,12 +98,12 @@ Everything on screen is real and labelled in the corner. Scenes are either the l
 
 ## What's on screen, for the record
 
-| Time | Source |
-|---|---|
-| 0:00 | Live report `vis_55dbb8c2d7d2` (your walk, 31 Oct, 17:33) |
-| 0:38 | Live home page |
-| 0:50 | Live `/new`, creating a test site, then its site page |
-| 1:03 | The home page's replay of `vis_55dbb8c2d7d2`: stored stills with SAM 3.1's stored boxes, at 2× speed |
-| 1:31 | Your phone screenshots from that walk |
-| 1:50 | Live report `vis_55dbb8c2d7d2` |
-| 2:13 | Live app: the stored walk fed to Chrome as its camera, into a new visit on a fresh test site; result `vis_7ef2922f3dfd`, not verified (`Read "XKMX", expected "47TU"`). Sped up 7× during the walk and 19× during processing, labelled on screen |
+| Time | Source                                                                                                                                                                                                                                           |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 0:00 | Live report `vis_55dbb8c2d7d2` (your walk, 31 Oct, 17:33)                                                                                                                                                                                        |
+| 0:38 | Live home page                                                                                                                                                                                                                                   |
+| 0:49 | Live `/new`, creating a test site, then its site page                                                                                                                                                                                            |
+| 1:01 | The home page's replay of `vis_55dbb8c2d7d2`: stored stills with SAM 3.1's stored boxes, at 1.9× speed                                                                                                                                             |
+| 1:30 | Your phone screenshots from that walk                                                                                                                                                                                                            |
+| 1:49 | Live report `vis_55dbb8c2d7d2`                                                                                                                                                                                                                   |
+| 2:10 | Live app: the stored walk fed to Chrome as its camera, into a new visit on a fresh test site; result `vis_7ef2922f3dfd`, not verified (`Read "XKMX", expected "47TU"`). Sped up 7× during the walk and 32× during processing, labelled on screen |
