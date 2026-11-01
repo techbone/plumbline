@@ -12,7 +12,9 @@ For Nigerians abroad building a house back home through a foreman they can't sup
 
 ## Demo
 
-TODO: 3-minute video, recorded on the live app. Nothing sped up unless the video says so on screen.
+[![Watch the demo on YouTube (2:56)](https://img.youtube.com/vi/xlCYNuYCelE/hqdefault.jpg)](https://youtu.be/xlCYNuYCelE)
+
+**[Watch on YouTube (2:56)](https://youtu.be/xlCYNuYCelE).** A real 53 s walk in Karsana, Abuja (372 blocks, verified), the report it produced, then that same recording fed into a new visit as the camera, which comes back "Not verified". Every scene is labelled in the corner: live app, live report, screenshots from the phone, or a replay of the stored walk. Sped-up parts say so on screen (the walk replay at 1.9×, the replay attack at 7× and 32×). Shot list and narration: [docs/demo-script.md](docs/demo-script.md).
 
 ## Verify it yourself in 90 seconds
 
@@ -48,7 +50,7 @@ npm run e2e -- fixtures/your-walk.mp4 http://localhost:3100
 | Test clip: stills sent vs the same video | 9.3 MB vs 29 MB (540p) vs 94 MB (as recorded) | [docs/evidence/e2e](docs/evidence/e2e) |
 | Yesterday's walk fed into a new visit as the camera | Not verified: `Read "XKMX", expected "47TU"` (353 blocks still counted) | [vis_7ef2922f3dfd](https://plumbline-ruby.vercel.app/r/vis_7ef2922f3dfd) |
 | JPEG quality 0.82 → 0.75 on the 53 s walk | 33.1 → 17.7 MB, 372 → 367 confirmed | [build log](docs/build-log.md) |
-| End to end through the HTTP API, 63 stills | 114–133 s, 225 confirmed + 16 seen once | `npm run e2e` |
+| End to end through the HTTP API on production (Cloudflare R2), 63 stills | 102 s, 225 confirmed + 15 seen once; the test clip has no visit code, so not verified, as it should be | [vis_67c0f5b7ac38](https://plumbline-ruby.vercel.app/r/vis_67c0f5b7ac38), `npm run e2e` |
 
 ## Contents
 
@@ -143,7 +145,7 @@ Guarded by `src/lib/verify/stitch.test.ts` (shift recovery, edge-box skip, same-
 | Payment release | A recommendation on the report | Not built: no payment rail |
 | Accounts | Unguessable links only | Simplified |
 | Columns, openings, bill of quantities, spoken codes | Explored in spikes, not in the product | Not built |
-| Home page phone | A replay of visit `vis_77d1c43227e3`: its stored stills and SAM boxes from a re-run, its stored report | Real data, replayed |
+| Home page phone | A replay of visit `vis_55dbb8c2d7d2`: its stored stills, SAM boxes from a local re-count (373/45 vs the live 372/45), and its stored report | Real data, replayed |
 
 ## Engineering decisions
 
@@ -153,6 +155,7 @@ Guarded by `src/lib/verify/stitch.test.ts` (shift recovery, edge-box skip, same-
 - **Seen once is not counted, only flagged.** SAM undercounts dirty or shaded blocks (about 94% recall on our stills) but doesn't invent them, so confirmed is a lower bound and seen-once goes to a person.
 - **Held checks downgrade, never upgrade.** GPS or a different site can turn verified into review; nothing turns short into verified.
 - **No database.** Every object is written once; a signed ticket replaces the visit table. Reports can't be edited after the fact, including ours.
+- **Read by key, never by listing.** Our first store (Vercel Blob) counted every `list()` as a billable operation and paused us at the free cap mid-build. Storage moved to Cloudflare R2 behind the same one-file interface (`src/lib/storage.ts`), writes are guarded by `If-None-Match: *`, and only the site history lists. Two early reports were lost in the move and are marked as such.
 - **Sharp edges routed around:** SAM output is special-token text, parsed with `@meta-sam/parser`; video mode's 16-object cap; iOS Safari ignoring `object-fit` on a camera stream; SAM giving slightly different boxes on a re-run (235/22 vs 236/21 on 117 stills). All in [docs/build-log.md](docs/build-log.md).
 
 ## Project layout
@@ -185,13 +188,14 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open `http://localhost:3000/new`, create a site, open its foreman link on a phone on the same network (camera access needs HTTPS or localhost; "Pick a video instead" works anywhere). Tests: `npm test` (21), `npm run typecheck`. Deploying: a Vercel project with a Blob store connected (tick "Add a read-write token"), `MODEL_API_KEY` and `VISIT_SECRET` set. `/api/health` reports which are missing.
+Open `http://localhost:3000/new`, create a site, open its foreman link on a phone on the same network (camera access needs HTTPS or localhost; "Pick a video instead" works anywhere). Tests: `npm test` (21), `npm run typecheck`. Deploying: a Vercel project with `MODEL_API_KEY`, `VISIT_SECRET` and the four `R2_*` variables set (a Cloudflare R2 bucket and an API token with Object Read & Write on that bucket only). `/api/health` reports which are missing.
 
 ## Known limitations and disclosure
 
 - Counts blocks in walls you walk along. Columns, openings, roofs and anything the camera can't see aren't counted.
 - Stitching assumes you walk parallel to the wall. Turning a corner or walking at a steep angle can double count or miss; the close-up filter catches only the step back from the code.
 - No hand-counted accuracy figure yet for a full phone walk; the counts above are SAM's, checkable frame by frame on each report.
+- On the 53 s Karsana walk, about 40 pairs of boxes overlap in the middle stretch, where the foreman stood further back and grass filled the lower half of each still. Some of those are likely double counts, so 372 may be high there. Measuring the slide on the wall band only cut the overlaps but moved another walk's count the other way; without a hand count we didn't ship it ([build log](docs/build-log.md)).
 - GPS can be spoofed; the visit code and same-site check carry more of the weight.
 - Test sites and reports are public to anyone with the link.
 

@@ -78,8 +78,9 @@ async function main() {
 
   const outDir = join("docs/evidence/e2e");
   await mkdir(outDir, { recursive: true });
-  const { blocks, offsets, ...summary } = result;
-  await writeFile(join(outDir, `${basename(file, extname(file))}.json`), JSON.stringify({ ...summary, blockCount: blocks.length, seconds: (Date.now() - t0) / 1000 }, null, 2));
+  // The evidence keeps the block count, not the per-block list or the frame offsets.
+  const summary = Object.fromEntries(Object.entries(result).filter(([k]) => k !== "blocks" && k !== "offsets"));
+  await writeFile(join(outDir, `${basename(file, extname(file))}.json`), JSON.stringify({ ...summary, blockCount: result.blocks.length, seconds: (Date.now() - t0) / 1000 }, null, 2));
 
   console.log(JSON.stringify({
     verdict: result.verdict,

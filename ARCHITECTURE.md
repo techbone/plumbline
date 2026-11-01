@@ -62,7 +62,7 @@ sequenceDiagram
   S-->>P: report /r/visit-id
 ```
 
-The phone never uploads a video. It grabs a still every half second (shortest side 540 px, JPEG) and sends each as its own small request. That keeps every request under serverless limits, keeps mobile data bounded, and lets SAM count while the walk is still happening. Measured: a 31 s walk of the test clip is 9.3 MB of stills against 29 MB for the 540p video and 94 MB as recorded; real phone walks on rough concrete run about 270 KB a still (24 MB for 44 s).
+The phone never uploads a video. It grabs a still every half second (shortest side 540 px, JPEG) and sends each as its own small request. That keeps every request under serverless limits, keeps mobile data bounded, and lets SAM count while the walk is still happening. Measured: a 31 s walk of the test clip is 9.3 MB of stills against 29 MB for the 540p video and 94 MB as recorded; real phone walks on rough concrete ran about 310 KB a still at JPEG quality 0.82 (33.1 MB for 53 s); at 0.75 the same walk is 17.6 MB, with the count within about 1% (see `docs/build-log.md`).
 
 ## Components
 
@@ -132,4 +132,5 @@ Site notes never change the verdict.
 | M2 | Oct 29–30 | Foreman capture flow (code, camera, live count), stills to Vercel Blob, signed tickets, report with stitched wall. Deployed. |
 | M3 | Oct 30 | First phone walks on the live app; close-up filter; iOS camera fixes. |
 | M4 | Oct 30 | GPS site pin, Muse Spark same-site check and site notes, test sites, owner timeline, home page replay. |
-| M5 | Nov 1–3 | Hand-count accuracy check, README, demo video; submit by Nov 4 12:00 ET. |
+| M5 | Oct 31–Nov 1 | Karsana walk (372 blocks, GPS pin); storage moved to Cloudflare R2 after the Blob free cap; stills at quality 0.75; replay attack tested on the live app (not verified); demo video. |
+| M6 | Nov 2–4 | Hand count of a walked wall for an accuracy figure; submit by Nov 4 12:00 ET. |

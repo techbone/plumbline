@@ -5,7 +5,7 @@
 - **One line:** The contractor's video becomes the receipt.
 - **Live app:** https://plumbline-ruby.vercel.app
 - **Repo:** https://github.com/techbone/plumbline
-- **Demo video:** TODO
+- **Demo video:** https://youtu.be/xlCYNuYCelE (2:56)
 - **Meta models used:** SAM 3.1 (image mode, on every still of a walk), Muse Spark 1.3 (blind visit-code read, same-site comparison, site notes)
 - **Built during the hackathon:** everything; first commit 2026-10-29.
 
@@ -20,5 +20,5 @@ The owner sets a milestone (this wall, this many blocks, this payment) and sends
 On a real 53-second walk in Karsana, Abuja, it confirmed 372 blocks and verified the visit. When we fed that same recording into a new visit as the camera, Muse Spark read the old code and the visit was not verified.
 
 Try it on any block wall: https://plumbline-ruby.vercel.app/new
-Demo video: TODO
+Demo video: https://youtu.be/xlCYNuYCelE
 Code: https://github.com/techbone/plumbline

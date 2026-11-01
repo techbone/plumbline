@@ -74,12 +74,12 @@ Dead ends, surprises from the Meta API, the path chosen, and the test that guard
 - **SAM isn't perfectly repeatable:** re-running SAM on the 117 stills of `vis_77d1c43227e3` gave 235 confirmed / 22 seen once against production's 236 / 21 (same 257 blocks in total). On the 88 stills of `vis_62077ef1a92a` a re-run matched production exactly. Reports store their own numbers and are never recomputed.
 - **Home page replay:** `npm run showcase` turns a stored visit into 59 small stills (1.26 MB) with SAM's boxes and the running count; the receipt quotes the production report.
 
-## Vercel Blob hit its free cap, storage moved to Cloudflare R2 (Nov 1)
+## 2026-11-01 — Vercel Blob hit its free cap, storage moved to Cloudflare R2
 
 - **Surprise:** Vercel Blob's free tier allows 2,000 "advanced operations" a month, and `list()` counts as one just like a write. Our read path called `list()` before every fetch, so one walk cost about 500 operations (a write for each still and each count, plus a list for each read when the report is built). A few walks and a day of page views used the cap, and the store was paused for 30 days. Every report and the owner pages returned 404.
 - **Decision:** moved the write-once store to Cloudflare R2 (S3 API; 10 GB free, no egress fees, 1M writes and 10M reads a month). Reads now go straight to the key with no list; only the site history lists. `src/lib/storage.ts` is still the single file that knows about the store, and the write-once rule is enforced by the store with `If-None-Match: *`.
 
-## Smaller stills: JPEG quality 0.82 → 0.75 (Nov 1)
+## 2026-11-01 — Smaller stills: JPEG quality 0.82 → 0.75
 
 - **Why:** at 0.82, real walks on rough concrete were 270–310 KB a still (33.1 MB for the 53 s Karsana walk). That's expensive mobile data for the foreman and fills storage fast.
 - **Measured:** re-encoded the Karsana walk's 107 stills with Chrome's canvas encoder and re-counted every one with SAM 3.1:
@@ -94,14 +94,28 @@ Dead ends, surprises from the Meta API, the path chosen, and the test that guard
 - **Decision:** 0.75. It halves the data and moves the confirmed count by about 1%. These stills were compressed twice (phone at 0.82, then again), which is harsher than a single encode on the phone, so this is the worst case.
 - **Also restored after the storage move:** the Karsana (`vis_55dbb8c2d7d2`) and `vis_77d1c43227e3` reports, byte for byte from copies saved before the Blob pause. The Karsana site pin's coordinates weren't in the report, so that site is unpinned until its next located visit. The `vis_62077ef1a92a` and `vis_60c648d2e671` reports were only in Blob and are gone.
 
-## Replay attack on the live app (Nov 1)
+## 2026-11-01 — Replay attack on the live app
 
 - **Test:** fed the stored Karsana walk (`vis_55dbb8c2d7d2`, paper code XKMX) to headless Chrome as its camera (`--use-file-for-fake-video-capture`) and walked it into a fresh visit on a new test site through the live foreman link.
 - **Result:** `vis_7ef2922f3dfd`, **not verified**. Muse Spark read "XKMX" on frame 0 and the visit expected "47TU". SAM still counted 353 confirmed blocks, which is the point: the count alone proves nothing about when it was filmed.
 - **Also seen:** from a desktop uplink, counting fell behind the walk (23 of 105 stills counted when the walk stopped, the rest during processing). On the phone walk over LTE it kept pace (107/107 at stop). Uploads, not SAM, are the bottleneck.
 
-## Muse Voice Transcribe is listed but not served; Spark 1.2 transcribes instead (Nov 1)
+## 2026-11-01 — Muse Voice Transcribe is listed but not served; Spark 1.2 transcribes instead
 
 - **Surprise:** `GET /v1/models` lists `muse-voice-transcribe-1.0`, but `POST /v1/audio/transcriptions` returns 404 with no body, and `/v1/responses` and `/v1/chat/completions` with that model say "The requested model was not found".
 - **Path chosen:** `muse-spark-1.2` on `/v1/responses` with an `input_audio` part (base64 WAV) transcribes well. We used it to check the demo voiceover: split the take at its pauses, transcribed each of the 19 lines, matched them to the script, then cut each line back out of the finished video at its planned time and transcribed it again to prove placement.
 - **Quirks:** on one clip Spark 1.2 replied that it couldn't access audio at all, and on another it declined a verbatim transcript because the audio named a place. Both passed on retry or by checking the level instead. Mishearings are phonetic ("Psalm 3.1" for SAM 3.1, "Kalsana" for Karsana).
+
+## 2026-11-01 — Overlapping boxes mid-walk; a fix we measured and didn't ship
+
+- **Surprise:** the stitched Karsana wall (`vis_55dbb8c2d7d2`) has a crowded middle stretch. Counting pairs of stitched blocks that overlap by more than 30% (IoU) gives about 40, all where the foreman stood further back (median block height fell from about 70 px to 42 px) and grass filled the lower half of each still. The shift between stills is measured on the whole frame, so grass in front and roofs behind, which slide at other speeds, can pull it off the wall.
+- **Tried:** measure the shift on the band of rows that hold blocks only. Re-stitched four stored walks (`npm run replay`, same SAM output):
+
+  | Walk | Confirmed / overlaps, whole frame | Confirmed / overlaps, wall band |
+  |---|---|---|
+  | Karsana 53 s | 373 / 41 | 359 / 28 |
+  | Boundary wall 58 s | 235 / 11 | 220 / 3 |
+  | Boundary wall 44 s | 239 / 34 | 258 / 31 |
+  | Test clip 31 s | 225 / 4 | 226 / 4 |
+
+- **Decision:** not shipped. Overlaps fell on two walks, but the 44 s walk's count rose by 19 with overlaps barely moving. Without a hand count of any of these walls we can't tell which version is closer to the truth, and changing the counter a few days before judging on a hunch would be worse than stating the limitation. It's in the README's limitations; a hand count of the Karsana wall decides it.

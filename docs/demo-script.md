@@ -1,10 +1,8 @@
-# Demo video: voiceover script (2:56)
+# Demo video: script and sources (2:56)
 
-The voiced cut is `out/plumbline-demo-voiced.mp4`: the scenes were re-timed to this recording, so every picture change lands on the line that names it. Timecodes below are that cut's.
+**[Watch on YouTube](https://youtu.be/xlCYNuYCelE).** Narration by the builder, recorded in one take; the scenes were then cut to the voice so each picture change lands on the line that names it. Timecodes below are the published cut's. Bracketed timecodes mark a change within a scene.
 
-The silent cut was read over at these lines: Calm pace, about 130 words a minute. Each block starts at its timecode. If you finish a line early, pause; the picture holds. Bracketed timecodes inside a block mark where the picture changes, so land the sentence after it on that change.
-
-Everything on screen is real and labelled in the corner. Scenes are either the live app, the live report, screenshots from the phone on 31 Oct, or a replay of that stored walk.
+Everything on screen is real and labelled in the corner: the live app, a live report, screenshots from the phone on 31 Oct, or a replay of that stored walk. Anything sped up says so on screen.
 
 ---
 
@@ -86,24 +84,18 @@ Everything on screen is real and labelled in the corner. Scenes are either the l
 
 ---
 
-## Recording the voice
-
-- **Where:** a quiet room with soft things around you (a wardrobe of clothes works). Phone voice memo is fine; hold it a hand's width from your mouth, slightly to the side.
-- **How:** one take per block, not the whole thing at once. Leave a second of silence before each block so they're easy to cut.
-- **Joining it to the video:** drop the clips on the video in any editor (CapCut, iMovie) at the timecodes above. Or, with one finished voice file the same length as the video:
-
-  ```sh
-  ffmpeg -i plumbline-demo.mp4 -i voice.m4a -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k -shortest plumbline-demo-voiced.mp4
-  ```
-
 ## What's on screen, for the record
 
 | Time | Source                                                                                                                                                                                                                                           |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 0:00 | Live report `vis_55dbb8c2d7d2` (your walk, 31 Oct, 17:33)                                                                                                                                                                                        |
+| 0:00 | Live report `vis_55dbb8c2d7d2` (a phone walk, 31 Oct 2026, 17:33)                                                                                                                                                                                        |
 | 0:38 | Live home page                                                                                                                                                                                                                                   |
 | 0:49 | Live `/new`, creating a test site, then its site page                                                                                                                                                                                            |
 | 1:01 | The home page's replay of `vis_55dbb8c2d7d2`: stored stills with SAM 3.1's stored boxes, at 1.9× speed                                                                                                                                             |
-| 1:30 | Your phone screenshots from that walk                                                                                                                                                                                                            |
+| 1:30 | Phone screenshots from that walk                                                                                                                                                                                                            |
 | 1:49 | Live report `vis_55dbb8c2d7d2`                                                                                                                                                                                                                   |
-| 2:10 | Live app: the stored walk fed to Chrome as its camera, into a new visit on a fresh test site; result `vis_7ef2922f3dfd`, not verified (`Read "XKMX", expected "47TU"`). Sped up 7× during the walk and 32× during processing, labelled on screen |
+| 2:10 | Live app: the stored walk fed to Chrome as its camera (`--use-file-for-fake-video-capture`), into a new visit on a fresh test site; result `vis_7ef2922f3dfd`, not verified (`Read "XKMX", expected "47TU"`). Sped up 7× during the walk and 32× during processing, labelled on screen |
+
+## How it was made
+
+Scenes were recorded from the live app with headless Chrome (desktop at 1920×1080, phones at 3× pixel density), title cards and labels rendered as HTML in the app's own type, and the cut assembled with ffmpeg. The narration was split at its pauses, each line checked against this script with a Muse Spark 1.2 transcription, and placed on the timeline; every line was then cut back out of the finished video and transcribed again to confirm placement.

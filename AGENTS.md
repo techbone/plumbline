@@ -6,7 +6,7 @@ Plumbline: construction progress verification for owners who can't be on site. R
 
 - All Meta API calls go through `src/lib/meta/`. The app and the scripts share that code. No mocks of Meta calls in the product path.
 - The phone sends JPEG stills, never video. The server recomputes everything from stored frames and counts; it never trusts counts sent by the client.
-- No database. State is write-once objects via `src/lib/storage.ts` (Vercel Blob in production, `./data` locally). Projects live in `src/lib/projects.ts`.
+- No database. State is write-once objects via `src/lib/storage.ts` (Cloudflare R2 in production, `./data` locally). Read objects by key; never list on a hot path (Vercel Blob paused us for it). Projects live in `src/lib/projects.ts`.
 - Deterministic logic (area cross-check, hashing, verdict rules) lives in `src/lib/verify/` as pure functions with unit tests.
 - The UI never says "verified" unless the stored report says so (`result.verdict.status`).
 - Commits: short lowercase conventional one-liners (`feat: add elevation upload`). No co-author or generated-by lines.

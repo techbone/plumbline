@@ -1,22 +1,21 @@
 {
-  "visitId": "vis_1090712a0966",
-  "finishedAt": "2026-10-30T12:19:24.952Z",
+  "visitId": "vis_67c0f5b7ac38",
+  "finishedAt": "2026-11-01T18:18:35.636Z",
   "meta": {
-    "visitId": "vis_1090712a0966",
-    "code": "EKJH",
-    "projectId": "p_ed588a8f99",
-    "milestoneId": "ms_1",
-    "issuedAt": 1793362651526,
-    "expiresAt": 1793364451526,
-    "projectName": "E2E wall",
-    "site": "Local",
-    "owner": "Test",
-    "milestoneTitle": "Fence front",
-    "target": 200,
-    "trancheNgn": 500000,
+    "visitId": "vis_67c0f5b7ac38",
+    "code": "JDVT",
+    "projectId": "prj_demo",
+    "milestoneId": "ms_fence",
+    "issuedAt": 1793557016925,
+    "expiresAt": 1793558816925,
+    "projectName": "Boundary wall and bungalow",
+    "site": "Plot 14, Kuje, Abuja",
+    "owner": "Musa E.",
+    "milestoneTitle": "Boundary wall, east run",
+    "target": 230,
+    "trancheNgn": 1150000,
     "kind": "blocks",
-    "projectToken": "p_ed588a8f99",
-    "sandbox": true
+    "projectToken": "demo"
   },
   "keyframes": 63,
   "framesUsed": 63,
@@ -41,11 +40,11 @@
     38,
     43,
     44,
-    44,
+    43,
     42,
     38,
     38,
-    34,
+    35,
     36,
     35,
     33,
@@ -54,7 +53,7 @@
     33,
     39,
     42,
-    44,
+    43,
     44,
     44,
     47,
@@ -78,8 +77,8 @@
     37,
     36,
     35,
-    35,
-    30,
+    34,
+    31,
     32,
     29,
     29,
@@ -91,7 +90,7 @@
     28
   ],
   "confirmed": 225,
-  "review": 16,
+  "review": 15,
   "code": {
     "status": "failed",
     "read": null,
@@ -100,26 +99,30 @@
     "note": "No visit code visible in the opening frames"
   },
   "location": {
-    "status": "review",
-    "distanceM": 0,
-    "accuracyM": 20,
-    "note": "Not pinned: a visit without a readable code can't set the site pin"
+    "status": "missing",
+    "distanceM": null,
+    "accuracyM": null,
+    "note": "The phone didn't share its location"
   },
   "sameSite": {
     "status": "same",
-    "note": "Matched cell mast, distant rooftops, tree line, wall block stains and vent holes, and foreground grass all align perfectly.",
-    "previousVisitId": "vis_f534f450df17"
+    "note": "Matched the telecom mast, long background building, tree line, and two-row vent blocks at the wall base.",
+    "previousVisitId": "vis_77d1c43227e3"
   },
   "notes": {
     "stage": "sandcrete block wall, unplastered",
-    "summary": "The wall is standing and unplastered with vents near the base in one section. There is a small hole in one place and vegetation along the base.",
+    "summary": "The wall is standing unplastered with weeds at the base, vents low down, and one block with a small hole next to the pillar.",
     "observations": [
       {
-        "text": "vegetation growing against the base of the wall",
+        "text": "green weeds growing against base of wall",
         "frame": 7
       },
       {
-        "text": "small hole through the face of the wall",
+        "text": "regular vents visible near base of wall",
+        "frame": 39
+      },
+      {
+        "text": "small hole in face of one block beside rendered pillar",
         "frame": 55
       }
     ]
@@ -131,6 +134,6 @@
       "No visit code visible in the opening frames"
     ]
   },
-  "blockCount": 241,
-  "seconds": 113.578
+  "blockCount": 240,
+  "seconds": 102.367
 }
