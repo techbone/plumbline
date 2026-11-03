@@ -47,6 +47,9 @@ export default function Home() {
       <header className="flex h-16 items-center justify-between">
         <Logo />
         <nav className="flex items-center gap-1 text-[14px]">
+          <Link href="/docs" className="inline-flex h-9 items-center rounded-[6px] px-3 text-muted hover:text-text">
+            Docs
+          </Link>
           <Link href="/p/demo" className="hidden h-9 items-center rounded-[6px] px-3 text-muted hover:text-text sm:inline-flex">
             Demo site
           </Link>

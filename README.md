@@ -8,7 +8,7 @@
 
 For Nigerians abroad building a house back home through a foreman they can't supervise. The foreman walks the wall with a one-time code on a phone; SAM 3.1 finds every block in every still while they walk, our stitching counts each block once, and Muse Spark reads the code blind, checks it's the same site as last time and writes site notes. Every number on a report comes from a real Meta API call on real frames, and you can open each frame.
 
-**[Watch the demo](#demo)** · **[Live app](https://plumbline-ruby.vercel.app)** · **[Verify it yourself](#verify-it-yourself-in-90-seconds)** · **[Architecture](ARCHITECTURE.md)** · **[Run it locally](#run-it-locally)**
+**[Watch the demo](#demo)** · **[Live app](https://plumbline-ruby.vercel.app)** · **[Docs](https://plumbline-ruby.vercel.app/docs)** · **[Verify it yourself](#verify-it-yourself-in-90-seconds)** · **[Architecture](ARCHITECTURE.md)** · **[Run it locally](#run-it-locally)**
 
 ## Demo
 
@@ -173,7 +173,7 @@ The report's count matches. We should be plain about why we don't fully trust th
 ## Project layout
 
 ```
-src/app/            pages (/, /new, /p, /v, /r) and API routes (/api/visits, /api/projects, /api/health)
+src/app/            pages (/, /docs, /new, /p, /v, /r) and API routes (/api/visits, /api/projects, /api/health)
 src/components/     capture flow and camera, report, owner pages, home replay
 src/lib/meta/       Meta API client, SAM image and video calls
 src/lib/verify/     pure, tested logic: stitching, GPS, area cross-check
